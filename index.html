@@ -1,603 +1,1656 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Ledger — Aditya Fertilizers (Tally-like)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Firebase compat SDKs (same major version from your file) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<meta charset="utf-8"/>
+<title>Aditya Fertilizers - Professional Accounting Ledger</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --primary: #0f766e;
+  --primary-dark: #065f57;
+  --secondary: #047857;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --success: #059669;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
 
-  <style>
-    :root{--bg:#f3f6f8;--card:#fff;--muted:#6b7280;--accent:#0f766e;--danger:#b91c1c}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Roboto,Arial;background:var(--bg);color:#07223b}
-    header{display:flex;align-items:center;padding:12px 16px;background:#fff;border-bottom:1px solid rgba(2,6,23,0.04)}
-    .title{font-weight:700;font-size:18px}
-    main{display:flex;gap:16px;padding:18px}
-    .sidebar{width:300px;background:var(--card);padding:14px;border-radius:8px;box-shadow:0 6px 18px rgba(12,15,20,0.04)}
-    .content{flex:1}
-    .card{background:var(--card);padding:12px;border-radius:8px;box-shadow:0 6px 18px rgba(12,15,20,0.04);margin-bottom:12px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #e6eef0}
-    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;background:var(--accent);color:white;font-weight:600}
-    .btn.warn{background:#f59e0b} .btn.danger{background:var(--danger)}
-    .row{display:flex;gap:8px}
-    .mini{font-size:12px;color:var(--muted)}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px;border-bottom:1px solid #eef6f4;text-align:left;font-size:13px}
-    .badge{padding:6px 8px;border-radius:8px;font-weight:700;color:white}
-    .badge-pending{background:#f97316} .badge-received{background:#059669}
-    .searchRow{display:flex;gap:8px;align-items:center}
-    .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .muted{color:var(--muted)}
-    .small{font-size:13px;color:var(--muted)}
-  </style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.nav-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.nav-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.stat-title {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-change {
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.positive { color: var(--success); }
+.negative { color: var(--danger); }
+.warning { color: var(--warning); }
+
+.card {
+  background: var(--card);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1.5rem 1.5rem 0;
+  display: flex;
+  justify-content: between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.table tr:hover {
+  background: #f8fafc;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: #cbd5e1;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: white;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-content {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success { background: #dcfce7; color: var(--success); }
+.badge-danger { background: #fecaca; color: var(--danger); }
+.badge-warning { background: #fef3c7; color: var(--warning); }
+.badge-secondary { background: #f1f5f9; color: var(--text-muted); }
+
+.search-bar {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  padding-left: 2.5rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-medium { font-weight: 500; }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header {
+    padding: 1rem;
+  }
+  
+  .nav-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .filters {
+    flex-direction: column;
+  }
+  
+  .table-container {
+    font-size: 0.75rem;
+  }
+}
+</style>
 </head>
+
 <body>
-  <header>
-    <div class="title">Ledger — Aditya Fertilizers</div>
-    <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
-      <div class="small">Status: <span id="statusLabel">Initializing…</span></div>
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <header class="header">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+      Aditya Fertilizers - Accounting Ledger
     </div>
+    <nav class="nav-links">
+      <button class="nav-btn active" data-section="dashboard">Dashboard</button>
+      <button class="nav-btn" data-section="accounts">Accounts</button>
+      <button class="nav-btn" data-section="transactions">Transactions</button>
+      <button class="nav-btn" data-section="reports">Reports</button>
+      <button class="nav-btn" data-section="settings">Settings</button>
+    </nav>
   </header>
 
-  <main>
-    <aside class="sidebar card">
-      <div style="font-weight:700">Admin</div>
-      <div class="mini" id="adminEmail">—</div>
-      <hr/>
-      <label>Company</label>
-      <select id="companySelect"></select>
-      <div style="margin-top:8px;display:flex;gap:8px;">
-        <input id="newCompanyName" placeholder="New company name" />
-        <button class="btn" id="addCompanyBtn">Add</button>
-      </div>
-
-      <hr/>
-      <div style="font-weight:700">Quick actions</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-        <button class="btn" id="addPurchaseBtn">Add Purchase</button>
-        <button class="btn warn" id="addSaleBtn">Add Sale</button>
-        <button class="btn" id="openHistoryBtn">Open Ledger</button>
-        <button class="btn" id="openManageBtn">Manage Materials</button>
-      </div>
-
-      <hr/>
-      <div style="font-weight:700">Export / Import</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn" id="exportCsvBtn">Export CSV</button>
-        <input id="importFile" type="file" accept=".json" style="display:none"/>
-        <button class="btn ghost" id="importBtn" style="background:#eee;color:#07223b">Import</button>
-      </div>
-
-      <hr/>
-      <div class="small muted">App built from your uploaded file (Firebase config + admin credentials extracted). See top of code for the exact values used. :contentReference[oaicite:2]{index=2}</div>
-    </aside>
-
-    <section class="content">
-      <div class="card topbar">
-        <div>
-          <div style="font-weight:700" id="companyNameTitle">Select company</div>
-          <div class="mini" id="lastUpdated">Last update: —</div>
-        </div>
-
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="quickSearch" placeholder="Search party / material / note" />
-          <button class="btn" id="searchBtn">Search</button>
-          <button class="btn" id="clearSearchBtn" style="background:#94a3b8">Clear</button>
-        </div>
-      </div>
-
-      <div class="card" id="ledgerView">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-weight:700">Ledger — Transactions</div>
-          <div class="mini">Total entries: <span id="totalEntries">0</span></div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <div style="flex:1"><label>From</label><input type="date" id="filterFrom" /></div>
-          <div style="flex:1"><label>To</label><input type="date" id="filterTo" /></div>
-          <div style="width:160px"><label>Type</label>
-            <select id="filterType"><option value="">All</option><option value="purchase">Purchase</option><option value="sale">Sale</option></select>
+  <main class="container">
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="section">
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Receivables</div>
+          <div class="stat-value" id="totalReceivables">₹0</div>
+          <div class="stat-change positive">
+            <span>Outstanding from customers</span>
           </div>
-          <div style="width:160px"><label>Payment</label>
-            <select id="filterPayment"><option value="">All</option><option value="pending">Pending</option><option value="received">Received</option></select>
-          </div>
-          <div style="width:90px;display:flex;align-items:flex-end"><button class="btn" id="applyFilters">Apply</button></div>
         </div>
-
-        <div style="max-height:56vh;overflow:auto">
-          <table id="entriesTable">
-            <thead><tr><th>Date</th><th>Type</th><th>Material</th><th>Qty (bags)</th><th>Price/bag</th><th>Total</th><th>Party</th><th>Payment</th><th>Note</th><th>Actions</th></tr></thead>
-            <tbody></tbody>
-          </table>
+        <div class="stat-card">
+          <div class="stat-title">Total Payables</div>
+          <div class="stat-value" id="totalPayables">₹0</div>
+          <div class="stat-change negative">
+            <span>Outstanding to suppliers</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Net Position</div>
+          <div class="stat-value" id="netPosition">₹0</div>
+          <div class="stat-change" id="netPositionChange">
+            <span>Overall financial position</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">This Month Sales</div>
+          <div class="stat-value" id="monthSales">₹0</div>
+          <div class="stat-change positive">
+            <span>Current month revenue</span>
+          </div>
         </div>
       </div>
 
-      <div id="modalRoot"></div>
-    </section>
+      <div class="grid grid-cols-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Transactions</h3>
+            <button class="btn btn-primary btn-sm" onclick="showAddTransactionModal()">Add Transaction</button>
+          </div>
+          <div class="card-content">
+            <div id="recentTransactions">Loading...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Outstanding Payments</h3>
+          </div>
+          <div class="card-content">
+            <div id="outstandingPayments">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accounts Section -->
+    <div id="accounts-section" class="section hidden">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Company Accounts</h3>
+          <button class="btn btn-primary" onclick="showAddAccountModal()">Add Account</button>
+        </div>
+        <div class="card-content">
+          <div class="search-bar">
+            <input type="text" class="input search-input" placeholder="Search accounts..." id="accountSearch">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="21 21l-4.35-4.35"></path>
+            </svg>
+          </div>
+          <div class="table-container">
+            <table class="table" id="accountsTable">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Type</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                  <th>Last Transaction</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accountsTableBody">
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div id="transactions-section" class="section hidden">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">All Transactions</h3>
+          <button class="btn btn-primary" onclick="showAddTransactionModal()">Add Transaction</button>
+        </div>
+        <div class="card-content">
+          <div class="filters">
+            <select class="select" id="transactionTypeFilter">
+              <option value="">All Types</option>
+              <option value="purchase">Purchase</option>
+              <option value="sale">Sale</option>
+              <option value="payment">Payment</option>
+              <option value="receipt">Receipt</option>
+            </select>
+            <select class="select" id="paymentStatusFilter">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="partial">Partial</option>
+              <option value="paid">Paid</option>
+            </select>
+            <input type="date" class="input" id="fromDate">
+            <input type="date" class="input" id="toDate">
+            <button class="btn btn-secondary" onclick="applyFilters()">Apply Filters</button>
+            <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+          </div>
+          <div class="search-bar">
+            <input type="text" class="input search-input" placeholder="Search transactions..." id="transactionSearch">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="21 21l-4.35-4.35"></path>
+            </svg>
+          </div>
+          <div class="table-container">
+            <table class="table" id="transactionsTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Company</th>
+                  <th>Type</th>
+                  <th>Material</th>
+                  <th>Quantity</th>
+                  <th>Amount</th>
+                  <th>Payment Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsTableBody">
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div id="reports-section" class="section hidden">
+      <div class="grid grid-cols-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Profit & Loss</h3>
+          </div>
+          <div class="card-content">
+            <canvas id="profitLossChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Outstanding Analysis</h3>
+          </div>
+          <div class="card-content">
+            <canvas id="outstandingChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: 1.5rem;">
+        <div class="card-header">
+          <h3 class="card-title">Generate Reports</h3>
+        </div>
+        <div class="card-content">
+          <div class="grid grid-cols-3">
+            <button class="btn btn-primary" onclick="generateReport('aging')">Aging Report</button>
+            <button class="btn btn-primary" onclick="generateReport('pl')">P&L Statement</button>
+            <button class="btn btn-primary" onclick="generateReport('ledger')">Ledger Summary</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <footer style="padding:12px;text-align:center;color:var(--muted)">© Ledger exported from your source file. Use safely.</footer>
-
-<script>
-/* ------------------------
-   Firebase config & admin creds extracted from your uploaded file.
-   Values come directly from your uploaded doc. :contentReference[oaicite:3]{index=3}
-   ------------------------ */
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBEybu3XKeK3QOeRIMs-fK2dDwHtpCTqgQ",
-  authDomain: "aditya-supply-chain-b5f61.firebaseapp.com",
-  projectId: "aditya-supply-chain-b5f61",
-  storageBucket: "aditya-supply-chain-b5f61.firebasestorage.app",
-  messagingSenderId: "662836162599",
-  appId: "1:662836162599:web:2b49bde530e4b87924de02",
-  measurementId: "G-DQH00BNH1L"
-};
-
-// Hard-coded (from file) admin sign-in — rotate in production.
-const AUTO_SIGNIN = true;
-const ADMIN_EMAIL = 'adityajainaas@gmail.com';
-const ADMIN_PWD = 'Aditya@1609';
-
-firebase.initializeApp(FIREBASE_CONFIG);
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-/* App state */
-let currentCompanyId = null;
-let materialsCache = [];
-let entriesCache = [];
-
-/* Utility */
-function fmtDate(ts){ if(!ts) return '-'; if(ts.toDate) return ts.toDate().toLocaleString('en-IN'); return new Date(ts).toLocaleString('en-IN'); }
-function localDateStr(d=new Date()){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
-function toINR(x){ return '₹' + Number(x||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
-function showModal(html){ document.getElementById('modalRoot').innerHTML = `<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:9999"><div style="background:white;padding:12px;border-radius:8px;min-width:320px">${html}</div></div>`; }
-function closeModal(){ document.getElementById('modalRoot').innerHTML = ''; }
-
-/* Auth */
-auth.onAuthStateChanged(user=>{
-  document.getElementById('adminEmail').textContent = user ? (user.email||user.uid) : 'Not signed';
-  document.getElementById('statusLabel').textContent = user ? 'Signed in' : 'Signed out';
-});
-async function autoSignIn(){ if(!AUTO_SIGNIN) return; try{ await auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PWD); }catch(e){ console.warn('Auto sign in failed', e.message);} }
-
-/* Load companies */
-async function loadCompanies(){
-  const sel = document.getElementById('companySelect');
-  sel.innerHTML = '';
-  const snap = await db.collection('companies').orderBy('name').get();
-  snap.forEach(d=>{
-    const o = document.createElement('option'); o.value = d.id; o.textContent = d.data().name; sel.appendChild(o);
-  });
-  if(sel.options.length) {
-    if(!currentCompanyId) currentCompanyId = sel.options[0].value;
-    sel.value = currentCompanyId;
-    document.getElementById('companyNameTitle').textContent = sel.options[sel.selectedIndex].textContent;
-    startCompanyListeners(currentCompanyId);
-  } else {
-    document.getElementById('companyNameTitle').textContent = 'No companies';
-  }
-}
-document.getElementById('companySelect').addEventListener('change', e=>{
-  currentCompanyId = e.target.value;
-  document.getElementById('companyNameTitle').textContent = e.target.selectedOptions[0].textContent;
-  startCompanyListeners(currentCompanyId);
-});
-
-/* Start listeners for materials & entries for selected company */
-let matsUnsub=null, entsUnsub=null;
-function clearUnsub(){
-  if(matsUnsub) matsUnsub(); if(entsUnsub) entsUnsub();
-  matsUnsub = entsUnsub = null; materialsCache = []; entriesCache = [];
-}
-function startCompanyListeners(companyId){
-  if(!companyId) return;
-  clearUnsub();
-  const matsRef = db.collection('companies').doc(companyId).collection('materials').orderBy('name');
-  matsUnsub = matsRef.onSnapshot(snap=>{
-    materialsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
-  }, e=>console.error('mats err', e));
-
-  const entsRef = db.collection('companies').doc(companyId).collection('entries').orderBy('createdAt','desc').limit(5000);
-  entsUnsub = entsRef.onSnapshot(snap=>{
-    entriesCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
-    renderEntries();
-  }, e=>console.error('ents err', e));
-
-  db.collection('companies').doc(companyId).onSnapshot(doc=>{
-    const d = doc.data();
-    document.getElementById('lastUpdated').textContent = d && d.updatedAt ? fmtDate(d.updatedAt) : '-';
-  });
-}
-
-/* Rendering ledger entries with filters/search */
-function getFilterValues(){
-  const from = document.getElementById('filterFrom').value;
-  const to = document.getElementById('filterTo').value;
-  const type = document.getElementById('filterType').value;
-  const payment = document.getElementById('filterPayment').value;
-  const q = document.getElementById('quickSearch').value.trim().toLowerCase();
-  return {from,to,type,payment,q};
-}
-
-function entryMatches(e, filters){
-  if(filters.type && e.type !== filters.type) return false;
-  if(filters.payment && (e.paymentStatus || 'pending') !== filters.payment) return false;
-  if(filters.from){
-    const d = e.createdAt && e.createdAt.toDate ? e.createdAt.toDate() : new Date(e.createdAt || Date.now());
-    const start = new Date(filters.from); start.setHours(0,0,0,0);
-    if(d < start) return false;
-  }
-  if(filters.to){
-    const d = e.createdAt && e.createdAt.toDate ? e.createdAt.toDate() : new Date(e.createdAt || Date.now());
-    const end = new Date(filters.to); end.setHours(24,0,0,0);
-    if(d >= end) return false;
-  }
-  if(filters.q){
-    const fields = [
-      (e.party||'').toString(),
-      (e.note||'').toString(),
-      (getMaterialName(e.materialId)||''),
-      (e.type||'')
-    ].join(' ').toLowerCase();
-    if(!fields.includes(filters.q)) return false;
-  }
-  return true;
-}
-
-function getMaterialName(id){
-  const m = materialsCache.find(x=>x.id===id);
-  return m ? m.name : (id||'');
-}
-
-function renderEntries(){
-  const tbody = document.querySelector('#entriesTable tbody');
-  tbody.innerHTML = '';
-  const f = getFilterValues();
-  const filtered = entriesCache.filter(e=>entryMatches(e,f));
-  document.getElementById('totalEntries').textContent = filtered.length;
-  filtered.forEach(e=>{
-    const tr = document.createElement('tr');
-    const date = fmtDate(e.createdAt) || '-';
-    const typ = e.type || '-';
-    const material = escapeHtml(getMaterialName(e.materialId));
-    const bags = Number(e.bags||0);
-    const price = e.pricePerBag !== undefined && e.pricePerBag !== null ? toINR(e.pricePerBag) : '-';
-    const total = toINR(e.totalValue || (bags*(e.pricePerBag||0)));
-    const party = escapeHtml(e.party||'—');
-    const note = escapeHtml(e.note||'');
-    const pay = e.paymentStatus || 'pending';
-    const payBadge = `<span class="badge ${pay==='received' ? 'badge-received' : 'badge-pending'}">${pay}</span>`;
-    tr.innerHTML = `<td>${date}</td>
-                    <td>${typ}</td>
-                    <td>${material}</td>
-                    <td>${bags}</td>
-                    <td>${price}</td>
-                    <td>${total}</td>
-                    <td>${party}</td>
-                    <td>${payBadge} <button style="margin-left:6px" class="mini" onclick="togglePaymentStatus('${e.id}')">Toggle</button></td>
-                    <td>${note}</td>
-                    <td>
-                      <button class="btn ghost" onclick="openEditEntry('${e.id}')">Edit</button>
-                      <button class="btn danger" onclick="deleteEntry('${e.id}')">Delete</button>
-                    </td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-/* Escape HTML */
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-/* Toggle payment status */
-async function togglePaymentStatus(entryId){
-  if(!currentCompanyId) return alert('Select a company');
-  const ref = db.collection('companies').doc(currentCompanyId).collection('entries').doc(entryId);
-  try{
-    const doc = await ref.get();
-    if(!doc.exists) return alert('Entry not found');
-    const cur = doc.data();
-    const now = (cur.paymentStatus === 'received') ? 'pending' : 'received';
-    await ref.update({ paymentStatus: now, paymentUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    // onSnapshot will refresh UI
-  }catch(e){ alert('Toggle failed: ' + e.message); }
-}
-
-/* Add / Edit entries modals */
-function openAddEntryModal(type, preMaterialId=null){
-  if(!currentCompanyId) return alert('Select company first');
-  const matOptions = materialsCache.map(m=>`<option value="${m.id}" ${m.id===preMaterialId ? 'selected':''}>${escapeHtml(m.name)}</option>`).join('');
-  showModal(`
-    <div style="font-weight:700">${type==='purchase' ? 'Add Purchase' : 'Add Sale'}</div><hr>
-    <label>Material</label><select id="modal_mat">${matOptions}</select>
-    <label>Qty (bags)</label><input id="modal_bags" type="number" step="0.01" />
-    <label>Price per bag</label><input id="modal_price" type="number" step="0.01" />
-    <label>Party</label><input id="modal_party" />
-    <label>Note</label><input id="modal_note" />
-    <label>Payment status</label>
-      <select id="modal_payment"><option value="pending">pending</option><option value="received">received</option></select>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-      <button onclick="closeModal()" class="btn ghost">Cancel</button>
-      <button id="modal_saveBtn" class="btn">${type==='purchase' ? 'Save Purchase' : 'Save Sale'}</button>
+  <!-- Add Transaction Modal -->
+  <div id="transactionModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Transaction</h3>
+        <button onclick="hideModal('transactionModal')" class="btn btn-secondary btn-sm">✕</button>
+      </div>
+      <div class="modal-content">
+        <form id="transactionForm">
+          <div class="form-group">
+            <label class="label">Transaction Type</label>
+            <select class="select" id="transactionType" required>
+              <option value="">Select Type</option>
+              <option value="purchase">Purchase</option>
+              <option value="sale">Sale</option>
+              <option value="payment">Payment Made</option>
+              <option value="receipt">Payment Received</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Company</label>
+            <select class="select" id="transactionCompany" required>
+              <option value="">Select Company</option>
+              <!-- Dynamic options -->
+            </select>
+          </div>
+          
+          <div class="form-group" id="materialGroup">
+            <label class="label">Material</label>
+            <select class="select" id="transactionMaterial">
+              <option value="">Select Material</option>
+              <!-- Dynamic options -->
+            </select>
+          </div>
+          
+          <div class="grid grid-cols-2">
+            <div class="form-group" id="quantityGroup">
+              <label class="label">Quantity (Bags)</label>
+              <input type="number" class="input" id="transactionQuantity" step="0.01">
+            </div>
+            <div class="form-group" id="priceGroup">
+              <label class="label">Price per Bag</label>
+              <input type="number" class="input" id="transactionPrice" step="0.01">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Total Amount</label>
+            <input type="number" class="input" id="transactionAmount" step="0.01" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Payment Status</label>
+            <select class="select" id="paymentStatus" required>
+              <option value="pending">Pending</option>
+              <option value="partial">Partial</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+          
+          <div class="form-group" id="paidAmountGroup" style="display: none;">
+            <label class="label">Paid Amount</label>
+            <input type="number" class="input" id="paidAmount" step="0.01">
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Notes</label>
+            <textarea class="textarea" id="transactionNotes" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideModal('transactionModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTransaction()">Save Transaction</button>
+      </div>
     </div>
-  `);
-  document.getElementById('modal_saveBtn').onclick = async ()=>{
-    const materialId = document.getElementById('modal_mat').value;
-    const bags = Number(document.getElementById('modal_bags').value) || 0;
-    const price = document.getElementById('modal_price').value ? Number(document.getElementById('modal_price').value) : null;
-    const party = document.getElementById('modal_party').value || '';
-    const note = document.getElementById('modal_note').value || '';
-    const paymentStatus = document.getElementById('modal_payment').value || 'pending';
-    await addEntryTransaction(materialId, type, bags, price, party, note, paymentStatus);
-    closeModal();
-  };
-}
+  </div>
 
-async function addEntryTransaction(materialId, type, bagsCount, pricePerBag, party, note, paymentStatus='pending'){
-  if(!currentCompanyId) return alert('No company selected');
-  if(!materialId || bagsCount <= 0) return alert('Invalid input');
-  const companyRef = db.collection('companies').doc(currentCompanyId);
-  const matRef = companyRef.collection('materials').doc(materialId);
-  const entriesRef = companyRef.collection('entries');
-  try{
-    await db.runTransaction(async tx=>{
-      const matSnap = await tx.get(matRef);
-      if(!matSnap.exists) throw new Error('Material not found');
-      const mat = matSnap.data();
-      const currentStock = (mat.stockBags !== undefined && mat.stockBags !== null) ? Number(mat.stockBags || 0) : 0;
-      const currentAvg = (mat.pricePerBag !== undefined && mat.pricePerBag !== null) ? Number(mat.pricePerBag) : null;
-      const entryRef = entriesRef.doc();
-      const totalValue = Number(bagsCount) * (pricePerBag ? Number(pricePerBag) : 0);
-      if(type === 'purchase'){
-        let newAvg = currentAvg;
-        if(currentStock <= 0 || currentAvg === null) {
-          if(pricePerBag !== null) newAvg = pricePerBag;
-        } else if(pricePerBag !== null) {
-          const numerator = (currentStock * currentAvg) + (bagsCount * pricePerBag);
-          const denominator = (currentStock + bagsCount);
-          newAvg = denominator > 0 ? (numerator / denominator) : currentAvg;
-        }
-        const newStock = currentStock + bagsCount;
-        tx.set(entryRef, { type, materialId, bags: bagsCount, pricePerBag: pricePerBag || null, totalValue: totalValue || 0, party, note, paymentStatus, createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: auth.currentUser ? auth.currentUser.uid : null });
-        tx.update(matRef, { stockBags: Math.round(newStock*100)/100, pricePerBag: (newAvg !== null ? Math.round(newAvg*100)/100 : null), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-      } else if(type === 'sale'){
-        const costPerBag = (currentAvg !== null) ? currentAvg : 0;
-        const costTotal = bagsCount * costPerBag;
-        const newStock = currentStock - bagsCount;
-        if(newStock < -0.0001) throw new Error('Insufficient stock for this sale');
-        tx.set(entryRef, { type, materialId, bags: bagsCount, pricePerBag: pricePerBag || null, totalValue: totalValue || 0, costPerBag: Math.round(costPerBag*100)/100, costTotal: Math.round(costTotal*100)/100, party, note, paymentStatus, createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: auth.currentUser ? auth.currentUser.uid : null });
-        tx.update(matRef, { stockBags: Math.round(newStock*100)/100, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-      } else throw new Error('Unknown type');
-      tx.update(companyRef, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  <!-- Add Account Modal -->
+  <div id="accountModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Company Account</h3>
+        <button onclick="hideModal('accountModal')" class="btn btn-secondary btn-sm">✕</button>
+      </div>
+      <div class="modal-content">
+        <form id="accountForm">
+          <div class="form-group">
+            <label class="label">Company Name</label>
+            <input type="text" class="input" id="accountName" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Account Type</label>
+            <select class="select" id="accountType" required>
+              <option value="customer">Customer</option>
+              <option value="supplier">Supplier</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Contact Person</label>
+            <input type="text" class="input" id="contactPerson">
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Phone</label>
+            <input type="tel" class="input" id="accountPhone">
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Address</label>
+            <textarea class="textarea" id="accountAddress" rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Opening Balance</label>
+            <input type="number" class="input" id="openingBalance" step="0.01" placeholder="0.00">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideModal('accountModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAccount()">Save Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration (from your existing system)
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBEybu3XKeK3QOeRIMs-fK2dDwHtpCTqgQ",
+      authDomain: "aditya-supply-chain-b5f61.firebaseapp.com",
+      projectId: "aditya-supply-chain-b5f61",
+      storageBucket: "aditya-supply-chain-b5f61.firebasestorage.app",
+      messagingSenderId: "662836162599",
+      appId: "1:662836162599:web:2b49bde530e4b87924de02",
+      measurementId: "G-DQH00BNH1L"
+    };
+
+    // Admin credentials
+    const ADMIN_EMAIL = 'adityajainaas@gmail.com';
+    const ADMIN_PWD = 'Aditya@1609';
+
+    // Initialize Firebase
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Global state
+    let currentSection = 'dashboard';
+    let companies = [];
+    let materials = [];
+    let transactions = [];
+    let accounts = [];
+
+    // Utility functions
+    function formatCurrency(amount) {
+      return '₹' + Number(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    }
+
+    function formatDate(date) {
+      if (!date) return '-';
+      if (date.toDate) return date.toDate().toLocaleDateString('en-IN');
+      if (date.seconds) return new Date(date.seconds * 1000).toLocaleDateString('en-IN');
+      return new Date(date).toLocaleDateString('en-IN');
+    }
+
+    function showLoader() {
+      document.getElementById('loader').style.display = 'flex';
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function hideModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Authentication
+    async function autoSignIn() {
+      try {
+        await auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PWD);
+        console.log('Signed in successfully');
+      } catch (err) {
+        console.error('Auto sign-in failed:', err);
+        alert('Authentication failed: ' + err.message);
+      }
+    }
+
+    // Navigation
+    function showSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Remove active class from all nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected section
+      document.getElementById(sectionName + '-section').classList.remove('hidden');
+      
+      // Add active class to clicked nav button
+      document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+      
+      currentSection = sectionName;
+      
+      // Load section-specific data
+      if (sectionName === 'accounts') loadAccounts();
+      if (sectionName === 'transactions') loadTransactions();
+      if (sectionName === 'reports') loadReports();
+      if (sectionName === 'dashboard') loadDashboard();
+    }
+
+    // Event listeners for navigation
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          showSection(btn.dataset.section);
+        });
+      });
     });
-  }catch(e){ alert('Save failed: ' + e.message); console.error(e); }
-}
 
-/* Edit entry */
-async function openEditEntry(entryId){
-  if(!currentCompanyId) return alert('Select company first');
-  const ref = db.collection('companies').doc(currentCompanyId).collection('entries').doc(entryId);
-  const doc = await ref.get();
-  if(!doc.exists) return alert('Entry not found');
-  const e = doc.data();
-  const matOptions = materialsCache.map(m=>`<option value="${m.id}" ${m.id===e.materialId ? 'selected':''}>${escapeHtml(m.name)}</option>`).join('');
-  showModal(`
-    <div style="font-weight:700">Edit Entry</div><hr>
-    <label>Type</label><select id="edit_type"><option value="purchase">purchase</option><option value="sale">sale</option></select>
-    <label>Material</label><select id="edit_mat">${matOptions}</select>
-    <label>Qty</label><input id="edit_bags" type="number" value="${e.bags||0}" />
-    <label>Price/bag</label><input id="edit_price" type="number" value="${e.pricePerBag||''}" />
-    <label>Party</label><input id="edit_party" value="${escapeHtml(e.party||'')}" />
-    <label>Note</label><input id="edit_note" value="${escapeHtml(e.note||'')}" />
-    <label>Payment</label><select id="edit_payment"><option value="pending">pending</option><option value="received">received</option></select>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-      <button onclick="closeModal()" class="btn ghost">Cancel</button>
-      <button id="edit_saveBtn" class="btn">Save</button>
-    </div>
-  `);
-  document.getElementById('edit_type').value = e.type;
-  document.getElementById('edit_payment').value = e.paymentStatus || 'pending';
-  document.getElementById('edit_saveBtn').onclick = async ()=>{
-    const newType = document.getElementById('edit_type').value;
-    const newMatId = document.getElementById('edit_mat').value;
-    const newBags = Number(document.getElementById('edit_bags').value) || 0;
-    const newPrice = document.getElementById('edit_price').value ? Number(document.getElementById('edit_price').value) : null;
-    const newParty = document.getElementById('edit_party').value || '';
-    const newNote = document.getElementById('edit_note').value || '';
-    const newPayment = document.getElementById('edit_payment').value || 'pending';
-    if(newBags <= 0) return alert('Invalid bags');
-    try{
-      await ref.update({ type: newType, materialId: newMatId, bags: newBags, pricePerBag: newPrice || null, party: newParty, note: newNote, paymentStatus: newPayment, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-      // rebuild affected materials to reconcile stock & cost basis
-      await rebuildMaterialFromEntries(newMatId);
-      if(newMatId !== e.materialId) await rebuildMaterialFromEntries(e.materialId);
-      closeModal();
-    }catch(err){ alert('Update failed: ' + err.message); console.error(err); }
-  };
-}
-
-/* Delete entry */
-async function deleteEntry(entryId){
-  if(!confirm('Delete this entry?')) return;
-  try{
-    const ref = db.collection('companies').doc(currentCompanyId).collection('entries').doc(entryId);
-    const doc = await ref.get();
-    if(!doc.exists) throw new Error('Not found');
-    const e = doc.data();
-    await ref.delete();
-    await rebuildMaterialFromEntries(e.materialId);
-  }catch(err){ alert('Delete failed: ' + err.message); console.error(err); }
-}
-
-/* Rebuild material from entries (replay) — same algorithm as in source file */
-async function rebuildMaterialFromEntries(materialId){
-  if(!currentCompanyId || !materialId) return;
-  const companyRef = db.collection('companies').doc(currentCompanyId);
-  const matsRef = companyRef.collection('materials').doc(materialId);
-  const entriesRef = companyRef.collection('entries');
-  try{
-    const snap = await entriesRef.where('materialId','==',materialId).orderBy('createdAt','asc').get();
-    let stock = 0;
-    let avg = null;
-    const batch = db.batch();
-    for(const doc of snap.docs){
-      const e = doc.data();
-      const id = doc.id;
-      const bags = Number(e.bags || 0);
-      const price = (e.pricePerBag !== undefined && e.pricePerBag !== null) ? Number(e.pricePerBag) : null;
-      if(e.type === 'purchase'){
-        if(stock <= 0 || avg === null){
-          if(price !== null) avg = price;
-        } else {
-          if(price !== null){
-            const numerator = (stock * avg) + (bags * price);
-            const denominator = (stock + bags);
-            avg = denominator > 0 ? (numerator / denominator) : avg;
+    // Load data from existing supply chain system
+    async function loadExistingData() {
+      showLoader();
+      try {
+        // Load companies from existing system
+        const companiesSnapshot = await db.collection('companies').get();
+        companies = [];
+        
+        for (const doc of companiesSnapshot.docs) {
+          const companyData = doc.data();
+          companies.push({
+            id: doc.id,
+            name: companyData.name,
+            ...companyData
+          });
+          
+          // Create or update account for this company
+          await createAccountFromCompany(doc.id, companyData);
+        }
+        
+        // Load all entries (transactions) from existing system
+        for (const company of companies) {
+          const entriesSnapshot = await db.collection('companies')
+            .doc(company.id)
+            .collection('entries')
+            .orderBy('createdAt', 'desc')
+            .get();
+            
+          for (const entryDoc of entriesSnapshot.docs) {
+            const entry = entryDoc.data();
+            await createTransactionFromEntry(company.id, entryDoc.id, entry);
           }
         }
-        stock += bags;
-        const totalValue = bags * (price || 0);
-        batch.update(entriesRef.doc(id), { totalValue: totalValue || 0, pricePerBag: price || null });
-      } else if(e.type === 'sale'){
-        const costPerBag = (avg !== null) ? avg : 0;
-        const costTotal = bags * costPerBag;
-        batch.update(entriesRef.doc(id), { costPerBag: Math.round(costPerBag*100)/100, costTotal: Math.round(costTotal*100)/100, pricePerBag: e.pricePerBag || null, totalValue: (Number(e.totalValue) || (bags*(e.pricePerBag||0))) });
-        stock -= bags;
+        
+        populateCompanyDropdowns();
+        loadDashboard();
+        
+      } catch (err) {
+        console.error('Error loading existing data:', err);
+        alert('Error loading data: ' + err.message);
+      } finally {
+        hideLoader();
       }
     }
-    if(!snap.empty) await batch.commit();
-    const matPatch = { stockBags: Math.round(stock * 100) / 100, pricePerBag: (avg !== null ? Math.round(avg*100)/100 : null), updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-    await matsRef.update(matPatch);
-  }catch(err){ console.error('rebuildMaterialFromEntries failed', err); }
-}
 
-/* Export CSV (keeps structure similar to original) */
-async function exportCsv(){
-  if(!confirm('Export all companies, materials and entries to CSV?')) return;
-  try{
-    const rows = [];
-    rows.push(['companyId','companyName','materialId','materialName','materialStockBags','materialLowBags','materialKgPerBag','materialPricePerBag','entryId','entryType','entryBags','entryUnit','pricePerBag','totalValue','costPerBag','costTotal','party','note','entryCreatedAt','paymentStatus']);
-    const companiesSnap = await db.collection('companies').orderBy('name').get();
-    for(const cdoc of companiesSnap.docs){
-      const cid = cdoc.id; const cname = cdoc.data().name;
-      const matsSnap = await cdoc.ref.collection('materials').get();
-      const matMap = {};
-      matsSnap.forEach(m=> matMap[m.id] = m.data());
-      const entSnap = await cdoc.ref.collection('entries').orderBy('createdAt','desc').get();
-      if(entSnap.empty){
-        matsSnap.forEach(m=>{
-          rows.push([cid, cname, m.id, m.data().name, (m.data().stockBags||''), (m.data().lowStockBags||''), (m.data().kgPerBag||''), (m.data().pricePerBag||''), '', '', '', '', '', '', '', '', '', '', '']);
-        });
-      } else {
-        entSnap.forEach(e=>{
-          const ed = e.data();
-          const mat = matMap[ed.materialId] || {};
-          rows.push([cid, cname, ed.materialId||'', mat.name||'', mat.stockBags||'', mat.lowStockBags||'', mat.kgPerBag||'', mat.pricePerBag||'', e.id, ed.type||'', ed.bags||'', ed.unit||'', ed.pricePerBag||'', ed.totalValue||'', ed.costPerBag||'', ed.costTotal||'', ed.party||'', ed.note ? ed.note.replace(/\r?\n|\r/g,' ') : '', ed.createdAt ? (ed.createdAt.toDate ? ed.createdAt.toDate().toLocaleString('en-IN') : ed.createdAt) : '', ed.paymentStatus || '']);
-        });
+    // Create account from existing company data
+    async function createAccountFromCompany(companyId, companyData) {
+      try {
+        const accountRef = db.collection('ledger_accounts').doc(companyId);
+        const existingAccount = await accountRef.get();
+        
+        if (!existingAccount.exists) {
+          await accountRef.set({
+            name: companyData.name,
+            type: 'both', // Assume both customer and supplier initially
+            balance: 0,
+            totalPurchases: 0,
+            totalSales: 0,
+            totalPayments: 0,
+            totalReceipts: 0,
+            outstandingReceivable: 0,
+            outstandingPayable: 0,
+            contactPerson: '',
+            phone: '',
+            address: '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } catch (err) {
+        console.error('Error creating account:', err);
       }
     }
-    const csv = rows.map(r => r.map(cell=>{
-      if(cell===null||cell===undefined) return '';
-      const s = String(cell);
-      if(s.includes('"')) return `"${s.replace(/"/g,'""')}"`;
-      if(s.includes(',')||s.includes('\n')) return `"${s}"`;
-      return s;
-    }).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ledger_export.csv'; document.body.appendChild(a); a.click(); a.remove();
-    alert('CSV exported and downloaded.');
-  }catch(err){ alert('Export failed: ' + err.message); console.error(err); }
-}
 
-/* Management: add company / materials */
-document.getElementById('addCompanyBtn').onclick = async ()=>{
-  const name = document.getElementById('newCompanyName').value.trim();
-  if(!name) return alert('Enter company name');
-  try{
-    const docRef = db.collection('companies').doc();
-    await docRef.set({ name, name_lower: name.toLowerCase(), createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    document.getElementById('newCompanyName').value = '';
-    await loadCompanies();
-  }catch(err){ alert('Create failed: ' + err.message); }
-};
+    // Create transaction from existing entry
+    async function createTransactionFromEntry(companyId, entryId, entryData) {
+      try {
+        const transactionRef = db.collection('ledger_transactions').doc();
+        
+        // Get material name
+        let materialName = '';
+        if (entryData.materialId) {
+          try {
+            const materialDoc = await db.collection('companies')
+              .doc(companyId)
+              .collection('materials')
+              .doc(entryData.materialId)
+              .get();
+            if (materialDoc.exists) {
+              materialName = materialDoc.data().name;
+            }
+          } catch (err) {
+            console.warn('Could not fetch material name:', err);
+          }
+        }
 
-document.getElementById('exportCsvBtn').onclick = exportCsv;
-document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
-document.getElementById('importFile').addEventListener('change', async (ev)=>{
-  const f = ev.target.files[0]; if(!f) return;
-  try{
-    const text = await f.text(); const obj = JSON.parse(text);
-    // basic import: companies -> materials -> entries (user must ensure structure)
-    alert('Import completed (no validation). If you need a custom importer, tell me the file structure.');
-  }catch(err){ alert('Import failed: ' + err.message); }
-});
+        const transactionData = {
+          companyId: companyId,
+          originalEntryId: entryId,
+          type: entryData.type, // 'purchase' or 'sale'
+          materialId: entryData.materialId || null,
+          materialName: materialName,
+          quantity: entryData.bags || 0,
+          unit: 'bags',
+          pricePerUnit: entryData.pricePerBag || 0,
+          totalAmount: entryData.totalValue || 0,
+          paymentStatus: 'pending', // Default to pending, can be updated
+          paidAmount: 0,
+          pendingAmount: entryData.totalValue || 0,
+          party: entryData.party || '',
+          notes: entryData.note || '',
+          createdAt: entryData.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          synced: true
+        };
 
-/* Buttons for add purchase/sale and history */
-document.getElementById('addPurchaseBtn').onclick = ()=> openAddEntryModal('purchase');
-document.getElementById('addSaleBtn').onclick = ()=> openAddEntryModal('sale');
-document.getElementById('openHistoryBtn').onclick = ()=> {
-  document.querySelector('html,body').scrollTop = 0;
-  document.querySelector('#filterFrom').value = localDateStr();
-  document.querySelector('#filterTo').value = localDateStr();
-  renderEntries();
-};
-document.getElementById('openManageBtn').onclick = ()=>{
-  // Open simple manage materials dialog
-  if(!currentCompanyId) return alert('Select a company first');
-  const list = materialsCache.map(m=>`<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eef6f4"><div><strong>${escapeHtml(m.name)}</strong><div class="mini">Stock: ${m.stockBags||0} bags</div></div><div><button class="btn ghost" onclick="openMaterialEditor('${m.id}')">Edit</button></div></div>`).join('');
-  showModal(`<div style="font-weight:700">Manage Materials</div><hr><div style="max-height:50vh;overflow:auto">${list || '<div class="mini muted">No materials</div>'}</div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn ghost" onclick="closeModal()">Close</button></div>`);
-};
+        await transactionRef.set(transactionData);
+        
+        // Update account balance
+        await updateAccountBalance(companyId, entryData.type, entryData.totalValue || 0);
+        
+      } catch (err) {
+        console.error('Error creating transaction from entry:', err);
+      }
+    }
 
-window.openMaterialEditor = async function(materialId){
-  const doc = await db.collection('companies').doc(currentCompanyId).collection('materials').doc(materialId).get();
-  if(!doc.exists) return alert('Material not found');
-  const m = doc.data();
-  showModal(`<div style="font-weight:700">Edit material — ${escapeHtml(m.name)}</div><hr>
-    <label>Name</label><input id="mat_name" value="${escapeHtml(m.name)}" />
-    <label>Kg per bag</label><input id="mat_kg" value="${m.kgPerBag||50}" />
-    <label>Low stock bags</label><input id="mat_low" value="${m.lowStockBags||1}" />
-    <label>Default price per bag</label><input id="mat_price" value="${m.pricePerBag||''}" />
-    <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="mat_save">Save</button></div>`);
-  document.getElementById('mat_save').onclick = async ()=>{
-    const name = document.getElementById('mat_name').value.trim();
-    const kg = Number(document.getElementById('mat_kg').value)||0;
-    const low = Number(document.getElementById('mat_low').value)||0;
-    const price = document.getElementById('mat_price').value ? Number(document.getElementById('mat_price').value) : null;
-    try{
-      await db.collection('companies').doc(currentCompanyId).collection('materials').doc(materialId).update({ name, kgPerBag:kg, lowStockBags:low, pricePerBag: price || null, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-      await rebuildMaterialFromEntries(materialId);
-      closeModal();
-    }catch(err){ alert('Save material failed: ' + err.message); }
-  };
-};
+    // Update account balance
+    async function updateAccountBalance(companyId, transactionType, amount) {
+      try {
+        const accountRef = db.collection('ledger_accounts').doc(companyId);
+        const increment = firebase.firestore.FieldValue.increment(amount);
+        
+        const updateData = {
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        if (transactionType === 'purchase') {
+          updateData.totalPurchases = increment;
+          updateData.outstandingPayable = increment;
+        } else if (transactionType === 'sale') {
+          updateData.totalSales = increment;
+          updateData.outstandingReceivable = increment;
+        } else if (transactionType === 'payment') {
+          updateData.totalPayments = increment;
+          updateData.outstandingPayable = firebase.firestore.FieldValue.increment(-amount);
+        } else if (transactionType === 'receipt') {
+          updateData.totalReceipts = increment;
+          updateData.outstandingReceivable = firebase.firestore.FieldValue.increment(-amount);
+        }
+        
+        await accountRef.update(updateData);
+      } catch (err) {
+        console.error('Error updating account balance:', err);
+      }
+    }
 
-/* Search & filters */
-document.getElementById('applyFilters').onclick = renderEntries;
-document.getElementById('searchBtn').onclick = renderEntries;
-document.getElementById('clearSearchBtn').onclick = ()=>{
-  document.getElementById('quickSearch').value = '';
-  document.getElementById('filterFrom').value = '';
-  document.getElementById('filterTo').value = '';
-  document.getElementById('filterType').value = '';
-  document.getElementById('filterPayment').value = '';
-  renderEntries();
-};
+    // Load dashboard data
+    async function loadDashboard() {
+      try {
+        const accountsSnapshot = await db.collection('ledger_accounts').get();
+        let totalReceivables = 0;
+        let totalPayables = 0;
+        let monthSales = 0;
+        
+        accountsSnapshot.forEach(doc => {
+          const account = doc.data();
+          totalReceivables += account.outstandingReceivable || 0;
+          totalPayables += account.outstandingPayable || 0;
+        });
+        
+        // Calculate this month's sales
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        
+        const transactionsSnapshot = await db.collection('ledger_transactions')
+          .where('type', '==', 'sale')
+          .where('createdAt', '>=', startOfMonth)
+          .get();
+          
+        transactionsSnapshot.forEach(doc => {
+          const transaction = doc.data();
+          monthSales += transaction.totalAmount || 0;
+        });
+        
+        const netPosition = totalReceivables - totalPayables;
+        
+        // Update dashboard stats
+        document.getElementById('totalReceivables').textContent = formatCurrency(totalReceivables);
+        document.getElementById('totalPayables').textContent = formatCurrency(totalPayables);
+        document.getElementById('netPosition').textContent = formatCurrency(netPosition);
+        document.getElementById('monthSales').textContent = formatCurrency(monthSales);
+        
+        // Update net position styling
+        const netPositionChange = document.getElementById('netPositionChange');
+        if (netPosition > 0) {
+          netPositionChange.className = 'stat-change positive';
+        } else if (netPosition < 0) {
+          netPositionChange.className = 'stat-change negative';
+        } else {
+          netPositionChange.className = 'stat-change';
+        }
+        
+        await loadRecentTransactions();
+        await loadOutstandingPayments();
+        
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+      }
+    }
 
-/* Toggle payment helper for buttons in table */
-window.togglePaymentStatus = togglePaymentStatus;
-window.openEditEntry = openEditEntry;
-window.deleteEntry = deleteEntry;
+    // Load recent transactions
+    async function loadRecentTransactions() {
+      try {
+        const transactionsSnapshot = await db.collection('ledger_transactions')
+          .orderBy('createdAt', 'desc')
+          .limit(5)
+          .get();
+          
+        const container = document.getElementById('recentTransactions');
+        if (transactionsSnapshot.empty) {
+          container.innerHTML = '<p class="text-sm text-center">No transactions yet</p>';
+          return;
+        }
+        
+        let html = '';
+        for (const doc of transactionsSnapshot.docs) {
+          const transaction = doc.data();
+          
+          // Get company name
+          let companyName = 'Unknown Company';
+          try {
+            const accountDoc = await db.collection('ledger_accounts').doc(transaction.companyId).get();
+            if (accountDoc.exists) {
+              companyName = accountDoc.data().name;
+            }
+          } catch (err) {
+            console.warn('Could not fetch company name:', err);
+          }
+          
+          const typeClass = transaction.type === 'sale' || transaction.type === 'receipt' ? 'positive' : 'negative';
+          const typeIcon = transaction.type === 'sale' ? '↗' : transaction.type === 'purchase' ? '↙' : transaction.type === 'receipt' ? '💰' : '💸';
+          
+          html += `
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+              <div>
+                <div class="font-medium text-sm">${typeIcon} ${companyName}</div>
+                <div class="text-xs text-gray-500">${transaction.type.toUpperCase()} • ${formatDate(transaction.createdAt)}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium ${typeClass}">${formatCurrency(transaction.totalAmount)}</div>
+                <div class="text-xs ${transaction.paymentStatus === 'paid' ? 'text-green-600' : 'text-orange-600'}">${transaction.paymentStatus}</div>
+              </div>
+            </div>
+          `;
+        }
+        
+        container.innerHTML = html;
+      } catch (err) {
+        console.error('Error loading recent transactions:', err);
+        document.getElementById('recentTransactions').innerHTML = '<p class="text-sm text-center text-red-500">Error loading transactions</p>';
+      }
+    }
 
-/* Initial bootstrap */
-(async function init(){
-  await autoSignIn();
-  await loadCompanies();
-  document.getElementById('filterFrom').value = localDateStr();
-  document.getElementById('filterTo').value = localDateStr();
-})();
-</script>
+    // Load outstanding payments
+    async function loadOutstandingPayments() {
+      try {
+        const accountsSnapshot = await db.collection('ledger_accounts')
+          .where('outstandingReceivable', '>', 0)
+          .orderBy('outstandingReceivable', 'desc')
+          .limit(5)
+          .get();
+          
+        const container = document.getElementById('outstandingPayments');
+        if (accountsSnapshot.empty) {
+          container.innerHTML = '<p class="text-sm text-center">No outstanding payments</p>';
+          return;
+        }
+        
+        let html = '';
+        accountsSnapshot.forEach(doc => {
+          const account = doc.data();
+          html += `
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+              <div>
+                <div class="font-medium text-sm">${account.name}</div>
+                <div class="text-xs text-gray-500">Receivable</div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium text-orange-600">${formatCurrency(account.outstandingReceivable)}</div>
+                <button class="text-xs text-blue-600 hover:underline" onclick="recordPayment('${doc.id}')">Record Payment</button>
+              </div>
+            </div>
+          `;
+        });
+        
+        container.innerHTML = html;
+      } catch (err) {
+        console.error('Error loading outstanding payments:', err);
+        document.getElementById('outstandingPayments').innerHTML = '<p class="text-sm text-center text-red-500">Error loading payments</p>';
+      }
+    }
+
+    // Load accounts
+    async function loadAccounts() {
+      try {
+        const accountsSnapshot = await db.collection('ledger_accounts')
+          .orderBy('name')
+          .get();
+          
+        const tbody = document.getElementById('accountsTableBody');
+        tbody.innerHTML = '';
+        
+        accountsSnapshot.forEach(doc => {
+          const account = doc.data();
+          const balance = (account.outstandingReceivable || 0) - (account.outstandingPayable || 0);
+          const balanceClass = balance > 0 ? 'positive' : balance < 0 ? 'negative' : '';
+          const status = balance === 0 ? 'Settled' : balance > 0 ? 'Receivable' : 'Payable';
+          const statusClass = balance === 0 ? 'badge-success' : balance > 0 ? 'badge-warning' : 'badge-danger';
+          
+          const row = `
+            <tr>
+              <td class="font-medium">${account.name}</td>
+              <td><span class="badge badge-secondary">${account.type}</span></td>
+              <td class="${balanceClass}">${formatCurrency(Math.abs(balance))}</td>
+              <td><span class="badge ${statusClass}">${status}</span></td>
+              <td class="text-sm">${formatDate(account.updatedAt)}</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-secondary btn-sm" onclick="viewAccountLedger('${doc.id}')">Ledger</button>
+                  <button class="btn btn-secondary btn-sm" onclick="editAccount('${doc.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteAccount('${doc.id}')">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+        
+      } catch (err) {
+        console.error('Error loading accounts:', err);
+      }
+    }
+
+    // Load transactions
+    async function loadTransactions() {
+      try {
+        const transactionsSnapshot = await db.collection('ledger_transactions')
+          .orderBy('createdAt', 'desc')
+          .get();
+          
+        const tbody = document.getElementById('transactionsTableBody');
+        tbody.innerHTML = '';
+        
+        for (const doc of transactionsSnapshot.docs) {
+          const transaction = doc.data();
+          
+          // Get company name
+          let companyName = 'Unknown Company';
+          try {
+            const accountDoc = await db.collection('ledger_accounts').doc(transaction.companyId).get();
+            if (accountDoc.exists) {
+              companyName = accountDoc.data().name;
+            }
+          } catch (err) {
+            console.warn('Could not fetch company name:', err);
+          }
+          
+          const statusClass = transaction.paymentStatus === 'paid' ? 'badge-success' : 
+                             transaction.paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger';
+          
+          const row = `
+            <tr>
+              <td class="text-sm">${formatDate(transaction.createdAt)}</td>
+              <td class="font-medium">${companyName}</td>
+              <td><span class="badge badge-secondary">${transaction.type}</span></td>
+              <td>${transaction.materialName || '-'}</td>
+              <td class="text-right">${transaction.quantity ? transaction.quantity + ' ' + transaction.unit : '-'}</td>
+              <td class="text-right font-medium">${formatCurrency(transaction.totalAmount)}</td>
+              <td><span class="badge ${statusClass}">${transaction.paymentStatus}</span></td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-secondary btn-sm" onclick="editTransaction('${doc.id}')">Edit</button>
+                  <button class="btn btn-success btn-sm" onclick="updatePaymentStatus('${doc.id}')">Payment</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteTransaction('${doc.id}')">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        }
+        
+      } catch (err) {
+        console.error('Error loading transactions:', err);
+      }
+    }
+
+    // Populate company dropdowns
+    async function populateCompanyDropdowns() {
+      try {
+        const accountsSnapshot = await db.collection('ledger_accounts').orderBy('name').get();
+        
+        const companySelects = ['transactionCompany'];
+        companySelects.forEach(selectId => {
+          const select = document.getElementById(selectId);
+          if (select) {
+            select.innerHTML = '<option value="">Select Company</option>';
+            accountsSnapshot.forEach(doc => {
+              const account = doc.data();
+              select.innerHTML += `<option value="${doc.id}">${account.name}</option>`;
+            });
+          }
+        });
+      } catch (err) {
+        console.error('Error populating dropdowns:', err);
+      }
+    }
+
+    // Transaction form handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      const transactionType = document.getElementById('transactionType');
+      const paymentStatus = document.getElementById('paymentStatus');
+      const transactionAmount = document.getElementById('transactionAmount');
+      const transactionQuantity = document.getElementById('transactionQuantity');
+      const transactionPrice = document.getElementById('transactionPrice');
+      
+      if (transactionType) {
+        transactionType.addEventListener('change', function() {
+          const type = this.value;
+          const materialGroup = document.getElementById('materialGroup');
+          const quantityGroup = document.getElementById('quantityGroup');
+          const priceGroup = document.getElementById('priceGroup');
+          
+          if (type === 'payment' || type === 'receipt') {
+            materialGroup.style.display = 'none';
+            quantityGroup.style.display = 'none';
+            priceGroup.style.display = 'none';
+          } else {
+            materialGroup.style.display = 'block';
+            quantityGroup.style.display = 'block';
+            priceGroup.style.display = 'block';
+          }
+        });
+      }
+      
+      if (paymentStatus) {
+        paymentStatus.addEventListener('change', function() {
+          const paidAmountGroup = document.getElementById('paidAmountGroup');
+          if (this.value === 'partial') {
+            paidAmountGroup.style.display = 'block';
+          } else {
+            paidAmountGroup.style.display = 'none';
+          }
+        });
+      }
+      
+      // Auto-calculate total amount
+      if (transactionQuantity && transactionPrice && transactionAmount) {
+        function calculateTotal() {
+          const qty = parseFloat(transactionQuantity.value) || 0;
+          const price = parseFloat(transactionPrice.value) || 0;
+          transactionAmount.value = (qty * price).toFixed(2);
+        }
+        
+        transactionQuantity.addEventListener('input', calculateTotal);
+        transactionPrice.addEventListener('input', calculateTotal);
+      }
+    });
+
+    // Modal functions
+    function showAddTransactionModal() {
+      populateCompanyDropdowns();
+      showModal('transactionModal');
+    }
+
+    function showAddAccountModal() {
+      showModal('accountModal');
+    }
+
+    // Save transaction
+    async function saveTransaction() {
+      const form = document.getElementById('transactionForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      showLoader();
+      try {
+        const transactionData = {
+          companyId: document.getElementById('transactionCompany').value,
+          type: document.getElementById('transactionType').value,
+          materialId: document.getElementById('transactionMaterial').value || null,
+          materialName: document.getElementById('transactionMaterial').selectedOptions[0]?.textContent || '',
+          quantity: parseFloat(document.getElementById('transactionQuantity').value) || 0,
+          unit: 'bags',
+          pricePerUnit: parseFloat(document.getElementById('transactionPrice').value) || 0,
+          totalAmount: parseFloat(document.getElementById('transactionAmount').value),
+          paymentStatus: document.getElementById('paymentStatus').value,
+          paidAmount: document.getElementById('paymentStatus').value === 'partial' ? 
+                      parseFloat(document.getElementById('paidAmount').value) || 0 : 
+                      document.getElementById('paymentStatus').value === 'paid' ? 
+                      parseFloat(document.getElementById('transactionAmount').value) : 0,
+          party: '',
+          notes: document.getElementById('transactionNotes').value,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          synced: false
+        };
+        
+        transactionData.pendingAmount = transactionData.totalAmount - transactionData.paidAmount;
+        
+        const transactionRef = await db.collection('ledger_transactions').add(transactionData);
+        
+        // Update account balance
+        await updateAccountBalance(transactionData.companyId, transactionData.type, transactionData.totalAmount);
+        
+        hideModal('transactionModal');
+        form.reset();
+        loadDashboard();
+        if (currentSection === 'transactions') loadTransactions();
+        
+        alert('Transaction saved successfully!');
+        
+      } catch (err) {
+        console.error('Error saving transaction:', err);
+        alert('Error saving transaction: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // Save account
+    async function saveAccount() {
+      const form = document.getElementById('accountForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      showLoader();
+      try {
+        const accountData = {
+          name: document.getElementById('accountName').value,
+          type: document.getElementById('accountType').value,
+          contactPerson: document.getElementById('contactPerson').value,
+          phone: document.getElementById('accountPhone').value,
+          address: document.getElementById('accountAddress').value,
+          balance: 0,
+          totalPurchases: 0,
+          totalSales: 0,
+          totalPayments: 0,
+          totalReceipts: 0,
+          outstandingReceivable: 0,
+          outstandingPayable: parseFloat(document.getElementById('openingBalance').value) || 0,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('ledger_accounts').add(accountData);
+        
+        hideModal('accountModal');
+        form.reset();
+        populateCompanyDropdowns();
+        if (currentSection === 'accounts') loadAccounts();
+        
+        alert('Account created successfully!');
+        
+      } catch (err) {
+        console.error('Error saving account:', err);
+        alert('Error saving account: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // Update payment status
+    async function updatePaymentStatus(transactionId) {
+      const newStatus = prompt('Enter payment status (pending/partial/paid):', 'paid');
+      if (!newStatus || !['pending', 'partial', 'paid'].includes(newStatus)) return;
+      
+      let paidAmount = 0;
+      if (newStatus === 'partial') {
+        paidAmount = parseFloat(prompt('Enter paid amount:')) || 0;
+      } else if (newStatus === 'paid') {
+        try {
+          const doc = await db.collection('ledger_transactions').doc(transactionId).get();
+          paidAmount = doc.data().totalAmount;
+        } catch (err) {
+          console.error('Error getting transaction:', err);
+          return;
+        }
+      }
+      
+      showLoader();
+      try {
+        await db.collection('ledger_transactions').doc(transactionId).update({
+          paymentStatus: newStatus,
+          paidAmount: paidAmount,
+          pendingAmount: firebase.firestore.FieldValue.increment(paidAmount),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        loadTransactions();
+        loadDashboard();
+        alert('Payment status updated successfully!');
+        
+      } catch (err) {
+        console.error('Error updating payment status:', err);
+        alert('Error updating payment status: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // Delete functions
+    async function deleteTransaction(transactionId) {
+      if (!confirm('Are you sure you want to delete this transaction?')) return;
+      
+      showLoader();
+      try {
+        await db.collection('ledger_transactions').doc(transactionId).delete();
+        loadTransactions();
+        loadDashboard();
+        alert('Transaction deleted successfully!');
+      } catch (err) {
+        console.error('Error deleting transaction:', err);
+        alert('Error deleting transaction: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function deleteAccount(accountId) {
+      if (!confirm('Are you sure you want to delete this account? This will also delete all related transactions.')) return;
+      
+      showLoader();
+      try {
+        // Delete all transactions for this account
+        const transactionsSnapshot = await db.collection('ledger_transactions')
+          .where('companyId', '==', accountId)
+          .get();
+          
+        const batch = db.batch();
+        transactionsSnapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        
+        // Delete the account
+        batch.delete(db.collection('ledger_accounts').doc(accountId));
+        
+        await batch.commit();
+        
+        loadAccounts();
+        loadDashboard();
+        alert('Account and related transactions deleted successfully!');
+      } catch (err) {
+        console.error('Error deleting account:', err);
+        alert('Error deleting account: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const accountSearch = document.getElementById('accountSearch');
+      const transactionSearch = document.getElementById('transactionSearch');
+      
+      if (accountSearch) {
+        accountSearch.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#accountsTableBody tr');
+          
+          rows.forEach(row => {
+            const companyName = row.cells[0].textContent.toLowerCase();
+            if (companyName.includes(searchTerm)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
+      
+      if (transactionSearch) {
+        transactionSearch.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#transactionsTableBody tr');
+          
+          rows.forEach(row => {
+            const companyName = row.cells[1].textContent.toLowerCase();
+            const materialName = row.cells[3].textContent.toLowerCase();
+            
+            if (companyName.includes(searchTerm) || materialName.includes(searchTerm)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
+    });
+
+    // Filter functionality
+    function applyFilters() {
+      const typeFilter = document.getElementById('transactionTypeFilter').value;
+      const statusFilter = document.getElementById('paymentStatusFilter').value;
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      
+      const rows = document.querySelectorAll('#transactionsTableBody tr');
+      
+      rows.forEach(row => {
+        let show = true;
+        
+        if (typeFilter && !row.cells[2].textContent.toLowerCase().includes(typeFilter)) {
+          show = false;
+        }
+        
+        if (statusFilter && !row.cells[6].textContent.toLowerCase().includes(statusFilter)) {
+          show = false;
+        }
+        
+        // Date filtering would require more complex logic
+        // For now, we'll skip date filtering in the client-side implementation
+        
+        row.style.display = show ? '' : 'none';
+      });
+    }
+
+    function clearFilters() {
+      document.getElementById('transactionTypeFilter').value = '';
+      document.getElementById('paymentStatusFilter').value = '';
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = '';
+      
+      const rows = document.querySelectorAll('#transactionsTableBody tr');
+      rows.forEach(row => {
+        row.style.display = '';
+      });
+    }
+
+    // Placeholder functions for advanced features
+    function viewAccountLedger(accountId) {
+      alert('Account ledger view will be implemented. Account ID: ' + accountId);
+    }
+
+    function editAccount(accountId) {
+      alert('Edit account functionality will be implemented. Account ID: ' + accountId);
+    }
+
+    function editTransaction(transactionId) {
+      alert('Edit transaction functionality will be implemented. Transaction ID: ' + transactionId);
+    }
+
+    function recordPayment(accountId) {
+      const amount = prompt('Enter payment amount received:');
+      if (amount && !isNaN(amount)) {
+        // This would create a new receipt transaction
+        alert('Payment recording functionality will be implemented. Amount: ₹' + amount);
+      }
+    }
+
+    function loadReports() {
+      // Placeholder for reports
+      console.log('Loading reports...');
+    }
+
+    function generateReport(type) {
+      alert(`Generating ${type} report...`);
+    }
+
+    // Initialize the application
+    async function initializeApp() {
+      showLoader();
+      try {
+        await autoSignIn();
+        await loadExistingData();
+        console.log('Application initialized successfully');
+      } catch (err) {
+        console.error('Error initializing application:', err);
+        alert('Error initializing application: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // Start the application
+    initializeApp();
+  </script>
 </body>
 </html>
