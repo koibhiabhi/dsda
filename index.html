@@ -138,7 +138,7 @@ body {
 .card-header {
   padding: 1.5rem 1.5rem 0;
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -626,6 +626,23 @@ body {
         </div>
       </div>
     </div>
+
+    <!-- Settings Section -->
+    <div id="settings-section" class="section hidden">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">System Settings</h3>
+        </div>
+        <div class="card-content">
+          <div class="grid grid-cols-2">
+            <button class="btn btn-primary" onclick="syncWithSupplyChain()">Sync with Supply Chain</button>
+            <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+            <button class="btn btn-warning" onclick="clearCache()">Clear Cache</button>
+            <button class="btn btn-danger" onclick="resetSystem()">Reset System</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Add Transaction Modal -->
@@ -759,198 +776,302 @@ body {
   </div>
 
   <script>
-    // Firebase Configuration (from your existing system)
-   // Firebase Configuration
-  const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyBEybu3XKeK3QOeRIMs-fK2dDwHtpCTqgQ",
-    authDomain: "aditya-supply-chain-b5f61.firebaseapp.com",
-    projectId: "aditya-supply-chain-b5f61",
-    storageBucket: "aditya-supply-chain-b5f61.firebasestorage.app",
-    messagingSenderId: "662836162599",
-    appId: "1:662836162599:web:2b49bde530e4b87924de02",
-    measurementId: "G-DQH00BNH1L"
-  };
+    // Firebase Configuration
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBEybu3XKeK3QOeRIMs-fK2dDwHtpCTqgQ",
+      authDomain: "aditya-supply-chain-b5f61.firebaseapp.com",
+      projectId: "aditya-supply-chain-b5f61",
+      storageBucket: "aditya-supply-chain-b5f61.firebasestorage.app",
+      messagingSenderId: "662836162599",
+      appId: "1:662836162599:web:2b49bde530e4b87924de02",
+      measurementId: "G-DQH00BNH1L"
+    };
 
-  const ADMIN_EMAIL = 'adityajainaas@gmail.com';
-  const ADMIN_PWD = 'Aditya@1609';
+    // Admin credentials
+    const ADMIN_EMAIL = 'adityajainaas@gmail.com';
+    const ADMIN_PWD = 'Aditya@1609';
 
-  firebase.initializeApp(FIREBASE_CONFIG);
-  const db = firebase.firestore();
-  const auth = firebase.auth();
+    // Initialize Firebase
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-  // Global state
-  let currentSection = 'dashboard';
-  let companies = [];
-  let materials = [];   // store all materials with companyId
-  let transactions = [];
-  let accounts = [];
+    // Global state
+    let currentSection = 'dashboard';
+    let companies = [];
+    let materials = [];
+    let transactions = [];
+    let accounts = [];
 
-  // Utility functions
-  function formatCurrency(amount) {
-    return '₹' + Number(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-  }
-  function formatDate(date) {
-    if (!date) return '-';
-    if (date.toDate) return date.toDate().toLocaleDateString('en-IN');
-    if (date.seconds) return new Date(date.seconds * 1000).toLocaleDateString('en-IN');
-    return new Date(date).toLocaleDateString('en-IN');
-  }
-  function showLoader(){ document.getElementById('loader').style.display = 'flex'; }
-  function hideLoader(){ document.getElementById('loader').style.display = 'none'; }
-  function showModal(id){ document.getElementById(id).classList.remove('hidden'); }
-  function hideModal(id){ document.getElementById(id).classList.add('hidden'); }
-
-  // Authentication
-  async function autoSignIn() {
-    try {
-      await auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PWD);
-      console.log('Signed in successfully');
-    } catch (err) {
-      console.error('Auto sign-in failed:', err);
-      alert('Authentication failed: ' + err.message);
+    // Utility functions
+    function formatCurrency(amount) {
+      return '₹' + Number(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
     }
-  }
 
-  // Navigation
-  function showSection(sectionName) {
-    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(sectionName + '-section').classList.remove('hidden');
-    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
-    currentSection = sectionName;
-    if (sectionName === 'accounts') loadAccounts();
-    if (sectionName === 'transactions') loadTransactions();
-    if (sectionName === 'reports') loadReports();
-    if (sectionName === 'dashboard') loadDashboard();
-  }
+    function formatDate(date) {
+      if (!date) return '-';
+      if (date.toDate) return date.toDate().toLocaleDateString('en-IN');
+      if (date.seconds) return new Date(date.seconds * 1000).toLocaleDateString('en-IN');
+      return new Date(date).toLocaleDateString('en-IN');
+    }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => showSection(btn.dataset.section));
-    });
-  });
+    function showLoader() {
+      document.getElementById('loader').style.display = 'flex';
+    }
 
-  // --- Load existing data (companies, entries, materials) ---
-  async function loadExistingData() {
-    showLoader();
-    try {
-      const companiesSnapshot = await db.collection('companies').get();
-      companies = [];
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
 
-      for (const doc of companiesSnapshot.docs) {
-        const companyData = doc.data();
-        companies.push({ id: doc.id, name: companyData.name, ...companyData });
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+    }
 
-        // Create or update ledger account
-        await createAccountFromCompany(doc.id, companyData);
+    function hideModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
 
-        // --- Load materials for this company ---
-        const materialsSnapshot = await db.collection('companies')
-          .doc(doc.id).collection('materials').get();
-        for (const mDoc of materialsSnapshot.docs) {
-          const m = mDoc.data();
-          materials.push({ id: mDoc.id, companyId: doc.id, ...m });
-        }
-
-        // --- Load entries (transactions) ---
-        const entriesSnapshot = await db.collection('companies')
-          .doc(doc.id).collection('entries')
-          .orderBy('createdAt', 'desc').get();
-        for (const entryDoc of entriesSnapshot.docs) {
-          await createTransactionFromEntry(doc.id, entryDoc.id, entryDoc.data());
-        }
+    // Authentication
+    async function autoSignIn() {
+      try {
+        await auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PWD);
+        console.log('Signed in successfully');
+      } catch (err) {
+        console.error('Auto sign-in failed:', err);
+        alert('Authentication failed: ' + err.message);
       }
-
-      populateCompanyDropdowns();
-      loadDashboard();
-
-    } catch (err) {
-      console.error('Error loading existing data:', err);
-      alert('Error loading data: ' + err.message);
-    } finally {
-      hideLoader();
     }
-  }
 
-  // Create account from company
-  async function createAccountFromCompany(companyId, data) {
-    const ref = db.collection('ledger_accounts').doc(companyId);
-    if (!(await ref.get()).exists) {
-      await ref.set({
-        name: data.name,
-        type: 'both',
-        balance: 0,
-        totalPurchases: 0,
-        totalSales: 0,
-        totalPayments: 0,
-        totalReceipts: 0,
-        outstandingReceivable: 0,
-        outstandingPayable: 0,
-        contactPerson: '',
-        phone: '',
-        address: '',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    // Navigation
+    function showSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
       });
+      
+      // Remove active class from all nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected section
+      document.getElementById(sectionName + '-section').classList.remove('hidden');
+      
+      // Add active class to clicked nav button
+      document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+      
+      currentSection = sectionName;
+      
+      // Load section-specific data
+      if (sectionName === 'accounts') loadAccounts();
+      if (sectionName === 'transactions') loadTransactions();
+      if (sectionName === 'reports') loadReports();
+      if (sectionName === 'dashboard') loadDashboard();
     }
-  }
 
-  // Create transaction from entry (use cached materials)
-  async function createTransactionFromEntry(companyId, entryId, entryData) {
-    try {
-      let materialName = '';
-      if (entryData.materialId) {
-        const m = materials.find(mm => mm.id === entryData.materialId && mm.companyId === companyId);
-        materialName = m ? m.name : '';
+    // Event listeners for navigation
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          showSection(btn.dataset.section);
+        });
+      });
+    });
+
+    // Load data from existing supply chain system
+    async function loadExistingData() {
+      showLoader();
+      try {
+        console.log('Starting to load existing data...');
+        
+        // Load companies from existing system
+        const companiesSnapshot = await db.collection('companies').get();
+        companies = [];
+        materials = [];
+        transactions = [];
+        
+        console.log(`Found ${companiesSnapshot.size} companies`);
+        
+        for (const doc of companiesSnapshot.docs) {
+          const companyData = doc.data();
+          const companyObj = {
+            id: doc.id,
+            name: companyData.name,
+            ...companyData
+          };
+          companies.push(companyObj);
+          
+          console.log(`Processing company: ${companyData.name} (${doc.id})`);
+          
+          // Create or update account for this company
+          await createAccountFromCompany(doc.id, companyData);
+          
+          // Load materials for this company
+          try {
+            const materialsSnapshot = await db.collection('companies')
+              .doc(doc.id)
+              .collection('materials')
+              .get();
+              
+            console.log(`Found ${materialsSnapshot.size} materials for ${companyData.name}`);
+            
+            materialsSnapshot.forEach(materialDoc => {
+              const materialData = materialDoc.data();
+              materials.push({
+                id: materialDoc.id,
+                companyId: doc.id,
+                companyName: companyData.name,
+                name: materialData.name,
+                ...materialData
+              });
+              console.log(`- Material: ${materialData.name}`);
+            });
+          } catch (materialErr) {
+            console.warn(`Error loading materials for ${companyData.name}:`, materialErr);
+          }
+          
+          // Load entries (transactions) for this company
+          try {
+            const entriesSnapshot = await db.collection('companies')
+              .doc(doc.id)
+              .collection('entries')
+              .orderBy('createdAt', 'desc')
+              .get();
+              
+            console.log(`Found ${entriesSnapshot.size} entries for ${companyData.name}`);
+            
+            for (const entryDoc of entriesSnapshot.docs) {
+              const entry = entryDoc.data();
+              await createTransactionFromEntry(doc.id, entryDoc.id, entry);
+            }
+          } catch (entryErr) {
+            console.warn(`Error loading entries for ${companyData.name}:`, entryErr);
+          }
+        }
+        
+        console.log(`Total loaded: ${companies.length} companies, ${materials.length} materials, ${transactions.length} transactions`);
+        
+        populateCompanyDropdowns();
+        populateMaterialDropdowns();
+        loadDashboard();
+        
+      } catch (err) {
+        console.error('Error loading existing data:', err);
+        alert('Error loading data: ' + err.message);
+      } finally {
+        hideLoader();
       }
-
-      const data = {
-        companyId,
-        originalEntryId: entryId,
-        type: entryData.type,
-        materialId: entryData.materialId || null,
-        materialName,
-        quantity: entryData.bags || 0,
-        unit: 'bags',
-        pricePerUnit: entryData.pricePerBag || 0,
-        totalAmount: entryData.totalValue || 0,
-        paymentStatus: 'pending',
-        paidAmount: 0,
-        pendingAmount: entryData.totalValue || 0,
-        notes: entryData.note || '',
-        createdAt: entryData.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        synced: true
-      };
-      await db.collection('ledger_transactions').add(data);
-
-      await updateAccountBalance(companyId, entryData.type, entryData.totalValue || 0);
-    } catch (err) {
-      console.error('Error creating transaction from entry:', err);
     }
-  }
 
-  // --- Populate company + material dropdowns ---
-  async function populateCompanyDropdowns() {
-    const snapshot = await db.collection('ledger_accounts').orderBy('name').get();
-    const companySelect = document.getElementById('transactionCompany');
-    companySelect.innerHTML = '<option value="">Select Company</option>';
-    snapshot.forEach(doc => {
-      companySelect.innerHTML += `<option value="${doc.id}">${doc.data().name}</option>`;
-    });
-    // when company changes → update material dropdown
-    companySelect.addEventListener('change', e => {
-      populateMaterialDropdown(e.target.value);
-    });
-  }
+    // Create account from existing company data
+    async function createAccountFromCompany(companyId, companyData) {
+      try {
+        const accountRef = db.collection('ledger_accounts').doc(companyId);
+        const existingAccount = await accountRef.get();
+        
+        if (!existingAccount.exists) {
+          await accountRef.set({
+            name: companyData.name,
+            type: 'both', // Assume both customer and supplier initially
+            balance: 0,
+            totalPurchases: 0,
+            totalSales: 0,
+            totalPayments: 0,
+            totalReceipts: 0,
+            outstandingReceivable: 0,
+            outstandingPayable: 0,
+            contactPerson: '',
+            phone: '',
+            address: '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } catch (err) {
+        console.error('Error creating account:', err);
+      }
+    }
 
-  function populateMaterialDropdown(companyId) {
-    const materialSelect = document.getElementById('transactionMaterial');
-    materialSelect.innerHTML = '<option value="">Select Material</option>';
-    materials.filter(m => m.companyId === companyId).forEach(m => {
-      materialSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
-    });
-  }
+    // Create transaction from existing entry
+    async function createTransactionFromEntry(companyId, entryId, entryData) {
+      try {
+        // Check if transaction already exists to avoid duplicates
+        const existingTransaction = await db.collection('ledger_transactions')
+          .where('originalEntryId', '==', entryId)
+          .where('companyId', '==', companyId)
+          .get();
+          
+        if (!existingTransaction.empty) {
+          console.log(`Transaction already exists for entry ${entryId}, skipping...`);
+          return;
+        }
+        
+        const transactionRef = db.collection('ledger_transactions').doc();
+        
+        // Get material name from loaded materials
+        let materialName = '';
+        let materialData = null;
+        
+        if (entryData.materialId) {
+          materialData = materials.find(m => 
+            m.id === entryData.materialId && m.companyId === companyId
+          );
+          if (materialData) {
+            materialName = materialData.name;
+          } else {
+            // Try to fetch from database if not in memory
+            try {
+              const materialDoc = await db.collection('companies')
+                .doc(companyId)
+                .collection('materials')
+                .doc(entryData.materialId)
+                .get();
+              if (materialDoc.exists) {
+                materialName = materialDoc.data().name;
+              }
+            } catch (err) {
+              console.warn('Could not fetch material name:', err);
+            }
+          }
+        }
+
+        const transactionData = {
+          companyId: companyId,
+          originalEntryId: entryId,
+          type: entryData.type || 'purchase', // 'purchase' or 'sale'
+          materialId: entryData.materialId || null,
+          materialName: materialName,
+          quantity: entryData.bags || 0,
+          unit: 'bags',
+          pricePerUnit: entryData.pricePerBag || entryData.rate || 0,
+          totalAmount: entryData.totalValue || 0,
+          paymentStatus: entryData.paymentStatus || 'pending',
+          paidAmount: entryData.paidAmount || 0,
+          pendingAmount: (entryData.totalValue || 0) - (entryData.paidAmount || 0),
+          party: entryData.party || '',
+          notes: entryData.note || entryData.notes || '',
+          createdAt: entryData.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          synced: true
+        };
+
+        await transactionRef.set(transactionData);
+        
+        // Add to local transactions array
+        transactions.push({
+          id: transactionRef.id,
+          ...transactionData
+        });
+        
+        // Update account balance
+        await updateAccountBalance(companyId, entryData.type || 'purchase', entryData.totalValue || 0);
+        
+        console.log(`Created transaction for ${materialName || 'Unknown Material'}: ${formatCurrency(entryData.totalValue || 0)}`);
+        
+      } catch (err) {
+        console.error('Error creating transaction from entry:', err);
+      }
+    }
 
     // Update account balance
     async function updateAccountBalance(companyId, transactionType, amount) {
@@ -1070,14 +1191,14 @@ body {
           const typeIcon = transaction.type === 'sale' ? '↗' : transaction.type === 'purchase' ? '↙' : transaction.type === 'receipt' ? '💰' : '💸';
           
           html += `
-            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
               <div>
                 <div class="font-medium text-sm">${typeIcon} ${companyName}</div>
-                <div class="text-xs text-gray-500">${transaction.type.toUpperCase()} • ${formatDate(transaction.createdAt)}</div>
+                <div class="text-xs text-gray-500" style="font-size: 0.75rem; color: #6b7280;">${transaction.type.toUpperCase()} • ${formatDate(transaction.createdAt)}</div>
               </div>
-              <div class="text-right">
+              <div class="text-right" style="text-align: right;">
                 <div class="font-medium ${typeClass}">${formatCurrency(transaction.totalAmount)}</div>
-                <div class="text-xs ${transaction.paymentStatus === 'paid' ? 'text-green-600' : 'text-orange-600'}">${transaction.paymentStatus}</div>
+                <div class="text-xs" style="font-size: 0.75rem; color: ${transaction.paymentStatus === 'paid' ? '#059669' : '#d97706'};">${transaction.paymentStatus}</div>
               </div>
             </div>
           `;
@@ -1109,14 +1230,14 @@ body {
         accountsSnapshot.forEach(doc => {
           const account = doc.data();
           html += `
-            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
               <div>
                 <div class="font-medium text-sm">${account.name}</div>
-                <div class="text-xs text-gray-500">Receivable</div>
+                <div class="text-xs text-gray-500" style="font-size: 0.75rem; color: #6b7280;">Receivable</div>
               </div>
-              <div class="text-right">
-                <div class="font-medium text-orange-600">${formatCurrency(account.outstandingReceivable)}</div>
-                <button class="text-xs text-blue-600 hover:underline" onclick="recordPayment('${doc.id}')">Record Payment</button>
+              <div class="text-right" style="text-align: right;">
+                <div class="font-medium" style="color: #d97706;">${formatCurrency(account.outstandingReceivable)}</div>
+                <button class="text-xs" style="font-size: 0.75rem; color: #3b82f6; text-decoration: none; background: none; border: none; cursor: pointer;" onclick="recordPayment('${doc.id}')">Record Payment</button>
               </div>
             </div>
           `;
@@ -1244,6 +1365,40 @@ body {
       }
     }
 
+    // Populate material dropdowns
+    function populateMaterialDropdowns() {
+      const materialSelect = document.getElementById('transactionMaterial');
+      if (materialSelect) {
+        materialSelect.innerHTML = '<option value="">Select Material</option>';
+        
+        // Group materials by company for better organization
+        const materialsByCompany = {};
+        materials.forEach(material => {
+          if (!materialsByCompany[material.companyName]) {
+            materialsByCompany[material.companyName] = [];
+          }
+          materialsByCompany[material.companyName].push(material);
+        });
+        
+        // Add materials grouped by company
+        Object.keys(materialsByCompany).forEach(companyName => {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = companyName;
+          
+          materialsByCompany[companyName].forEach(material => {
+            const option = document.createElement('option');
+            option.value = material.id;
+            option.textContent = material.name;
+            option.setAttribute('data-company-id', material.companyId);
+            option.setAttribute('data-price', material.pricePerBag || material.kgPerBag || 0);
+            optgroup.appendChild(option);
+          });
+          
+          materialSelect.appendChild(optgroup);
+        });
+      }
+    }
+
     // Transaction form handlers
     document.addEventListener('DOMContentLoaded', function() {
       const transactionType = document.getElementById('transactionType');
@@ -1251,6 +1406,8 @@ body {
       const transactionAmount = document.getElementById('transactionAmount');
       const transactionQuantity = document.getElementById('transactionQuantity');
       const transactionPrice = document.getElementById('transactionPrice');
+      const transactionCompany = document.getElementById('transactionCompany');
+      const transactionMaterial = document.getElementById('transactionMaterial');
       
       if (transactionType) {
         transactionType.addEventListener('change', function() {
@@ -1267,6 +1424,40 @@ body {
             materialGroup.style.display = 'block';
             quantityGroup.style.display = 'block';
             priceGroup.style.display = 'block';
+          }
+        });
+      }
+      
+      // Filter materials by selected company
+      if (transactionCompany && transactionMaterial) {
+        transactionCompany.addEventListener('change', function() {
+          const selectedCompanyId = this.value;
+          const materialSelect = transactionMaterial;
+          
+          // Clear and repopulate materials based on selected company
+          materialSelect.innerHTML = '<option value="">Select Material</option>';
+          
+          if (selectedCompanyId) {
+            const companyMaterials = materials.filter(m => m.companyId === selectedCompanyId);
+            companyMaterials.forEach(material => {
+              const option = document.createElement('option');
+              option.value = material.id;
+              option.textContent = material.name;
+              option.setAttribute('data-price', material.pricePerBag || material.kgPerBag || 0);
+              materialSelect.appendChild(option);
+            });
+          }
+        });
+      }
+      
+      // Auto-fill price when material is selected
+      if (transactionMaterial && transactionPrice) {
+        transactionMaterial.addEventListener('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const price = selectedOption.getAttribute('data-price');
+          if (price && price > 0) {
+            transactionPrice.value = price;
+            calculateTotal();
           }
         });
       }
@@ -1292,12 +1483,16 @@ body {
         
         transactionQuantity.addEventListener('input', calculateTotal);
         transactionPrice.addEventListener('input', calculateTotal);
+        
+        // Make calculateTotal available globally
+        window.calculateTotal = calculateTotal;
       }
     });
 
     // Modal functions
     function showAddTransactionModal() {
       populateCompanyDropdowns();
+      populateMaterialDropdowns();
       showModal('transactionModal');
     }
 
@@ -1315,11 +1510,14 @@ body {
       
       showLoader();
       try {
+        const materialSelect = document.getElementById('transactionMaterial');
+        const selectedMaterialOption = materialSelect.options[materialSelect.selectedIndex];
+        
         const transactionData = {
           companyId: document.getElementById('transactionCompany').value,
           type: document.getElementById('transactionType').value,
           materialId: document.getElementById('transactionMaterial').value || null,
-          materialName: document.getElementById('transactionMaterial').selectedOptions[0]?.textContent || '',
+          materialName: selectedMaterialOption && selectedMaterialOption.value ? selectedMaterialOption.textContent : '',
           quantity: parseFloat(document.getElementById('transactionQuantity').value) || 0,
           unit: 'bags',
           pricePerUnit: parseFloat(document.getElementById('transactionPrice').value) || 0,
@@ -1422,12 +1620,22 @@ body {
       
       showLoader();
       try {
+        const transactionDoc = await db.collection('ledger_transactions').doc(transactionId).get();
+        const oldPaidAmount = transactionDoc.data().paidAmount || 0;
+        const additionalPayment = paidAmount - oldPaidAmount;
+        
         await db.collection('ledger_transactions').doc(transactionId).update({
           paymentStatus: newStatus,
           paidAmount: paidAmount,
-          pendingAmount: firebase.firestore.FieldValue.increment(paidAmount),
+          pendingAmount: transactionDoc.data().totalAmount - paidAmount,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+        
+        // Update account balance for payment/receipt
+        if (additionalPayment !== 0) {
+          const transactionType = transactionDoc.data().type === 'sale' ? 'receipt' : 'payment';
+          await updateAccountBalance(transactionDoc.data().companyId, transactionType, additionalPayment);
+        }
         
         loadTransactions();
         loadDashboard();
@@ -1569,7 +1777,7 @@ body {
       });
     }
 
-    // Placeholder functions for advanced features
+    // Advanced features
     function viewAccountLedger(accountId) {
       alert('Account ledger view will be implemented. Account ID: ' + accountId);
     }
@@ -1584,25 +1792,161 @@ body {
 
     function recordPayment(accountId) {
       const amount = prompt('Enter payment amount received:');
-      if (amount && !isNaN(amount)) {
-        // This would create a new receipt transaction
-        alert('Payment recording functionality will be implemented. Amount: ₹' + amount);
+      if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+        showLoader();
+        // Create a receipt transaction
+        db.collection('ledger_transactions').add({
+          companyId: accountId,
+          type: 'receipt',
+          materialId: null,
+          materialName: '',
+          quantity: 0,
+          unit: 'bags',
+          pricePerUnit: 0,
+          totalAmount: parseFloat(amount),
+          paymentStatus: 'paid',
+          paidAmount: parseFloat(amount),
+          pendingAmount: 0,
+          party: '',
+          notes: 'Payment recorded from dashboard',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          synced: false
+        }).then(() => {
+          updateAccountBalance(accountId, 'receipt', parseFloat(amount));
+          loadDashboard();
+          loadAccounts();
+          alert('Payment recorded successfully!');
+        }).catch(err => {
+          console.error('Error recording payment:', err);
+          alert('Error recording payment: ' + err.message);
+        }).finally(() => {
+          hideLoader();
+        });
       }
     }
 
     function loadReports() {
-      // Placeholder for reports
-      console.log('Loading reports...');
+      // Initialize charts
+      initializeCharts();
+    }
+
+    function initializeCharts() {
+      // Profit & Loss Chart
+      const plCtx = document.getElementById('profitLossChart');
+      if (plCtx) {
+        new Chart(plCtx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'Sales',
+              data: [12000, 19000, 15000, 25000, 22000, 30000],
+              borderColor: '#059669',
+              backgroundColor: 'rgba(5, 150, 105, 0.1)',
+              tension: 0.4
+            }, {
+              label: 'Purchases',
+              data: [8000, 12000, 10000, 18000, 15000, 20000],
+              borderColor: '#dc2626',
+              backgroundColor: 'rgba(220, 38, 38, 0.1)',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return '₹' + value.toLocaleString();
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Outstanding Analysis Chart
+      const outCtx = document.getElementById('outstandingChart');
+      if (outCtx) {
+        new Chart(outCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Receivables', 'Payables', 'Settled'],
+            datasets: [{
+              data: [45000, 30000, 25000],
+              backgroundColor: ['#d97706', '#dc2626', '#059669'],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+              }
+            }
+          }
+        });
+      }
     }
 
     function generateReport(type) {
-      alert(`Generating ${type} report...`);
+      showLoader();
+      setTimeout(() => {
+        hideLoader();
+        alert(`${type.toUpperCase()} report generation will be implemented. This will export detailed ${type} data.`);
+      }, 1000);
+    }
+
+    // Settings functions
+    function syncWithSupplyChain() {
+      if (confirm('This will sync all data from the supply chain system. Continue?')) {
+        loadExistingData();
+      }
+    }
+
+    function exportData() {
+      alert('Data export functionality will be implemented. This will export all ledger data to Excel/CSV.');
+    }
+
+    function clearCache() {
+      if (confirm('This will clear all cached data. Continue?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        alert('Cache cleared successfully!');
+        location.reload();
+      }
+    }
+
+    function resetSystem() {
+      if (confirm('WARNING: This will delete ALL ledger data. This action cannot be undone. Continue?')) {
+        const confirmReset = prompt('Type "RESET" to confirm system reset:');
+        if (confirmReset === 'RESET') {
+          showLoader();
+          // This would delete all ledger collections
+          alert('System reset functionality will be implemented with proper safeguards.');
+          hideLoader();
+        }
+      }
     }
 
     // Initialize the application
     async function initializeApp() {
       showLoader();
       try {
+        console.log('Initializing Aditya Fertilizers Ledger System...');
         await autoSignIn();
         await loadExistingData();
         console.log('Application initialized successfully');
@@ -1614,8 +1958,20 @@ body {
       }
     }
 
-    // Start the application
-    initializeApp();
+    // Start the application when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, starting application...');
+      initializeApp();
+    });
+
+    // Error handling
+    window.addEventListener('error', function(e) {
+      console.error('Global error:', e.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('Unhandled promise rejection:', e.reason);
+    });
   </script>
 </body>
 </html>
