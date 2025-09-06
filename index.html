@@ -917,14 +917,16 @@ body {
             
             materialsSnapshot.forEach(materialDoc => {
               const materialData = materialDoc.data();
-              materials.push({
+              const materialObj = {
                 id: materialDoc.id,
                 companyId: doc.id,
                 companyName: companyData.name,
-                name: materialData.name,
+                name: materialData.name || 'Unnamed Material',
+                pricePerBag: materialData.pricePerBag || materialData.kgPerBag || 0,
                 ...materialData
-              });
-              console.log(`- Material: ${materialData.name}`);
+              };
+              materials.push(materialObj);
+              console.log(`- Material: ${materialObj.name} (Price: ${materialObj.pricePerBag})`);
             });
           } catch (materialErr) {
             console.warn(`Error loading materials for ${companyData.name}:`, materialErr);
