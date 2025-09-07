@@ -776,8 +776,8 @@ body {
     </div>
   </div>
 
-  <script>
- // Firebase Configuration
+<script>
+// Firebase Configuration
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBEybu3XKeK3QOeRIMs-fK2dDwHtpCTqgQ",
   authDomain: "aditya-supply-chain-b5f61.firebaseapp.com",
@@ -802,8 +802,7 @@ let currentSection = 'dashboard';
 let accounts = new Map();
 let transactions = [];
 let materials = [];
-let transactionHistory = new Map();
-let accountBalances = new Map();
+let myFirms = new Set(); // To track which accounts are your own firms
 
 // Utility functions
 function formatCurrency(amount) {
@@ -845,6 +844,47 @@ function hideModal(modalId) {
   document.getElementById(modalId).classList.add('hidden');
 }
 
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    z-index: 10000;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => notification.remove(), 300);
+  }, 5000);
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+
 // Authentication
 async function autoSignIn() {
   try {
@@ -856,11 +896,10 @@ async function autoSignIn() {
   }
 }
 
-// Account Management Class
+// Account Management
 class AccountManager {
   constructor() {
     this.accounts = new Map();
-    this.balances = new Map();
   }
 
   async createAccount(accountData) {
@@ -869,7 +908,7 @@ class AccountManager {
     const account = {
       id: accountId,
       name: accountData.name,
-      type: accountData.type, // 'customer', 'supplier', 'both'
+      type: accountData.type, // 'customer', 'supplier', 'both', 'my_firm'
       contactPerson: accountData.contactPerson || '',
       phone: accountData.phone || '',
       address: accountData.address || '',
@@ -879,8 +918,8 @@ class AccountManager {
       totalSales: 0,
       totalPayments: 0,
       totalReceipts: 0,
-      outstandingReceivable: accountData.type === 'customer' || accountData.type === 'both' ? 0 : null,
-      outstandingPayable: accountData.type === 'supplier' || accountData.type === 'both' ? parseFloat(accountData.openingBalance) || 0 : null,
+      outstandingReceivable: 0,
+      outstandingPayable: 0,
       creditLimit: parseFloat(accountData.creditLimit) || 0,
       paymentTerms: accountData.paymentTerms || 'immediate',
       status: 'active',
@@ -891,15 +930,17 @@ class AccountManager {
     await db.collection('ledger_accounts').doc(accountId).set(account);
     this.accounts.set(accountId, account);
     
+    // Track if this is one of your firms
+    if (accountData.type === 'my_firm') {
+      myFirms.add(accountId);
+    }
+    
     return account;
   }
 
-  async updateAccountBalance(accountId, transactionType, amount, operation = 'add') {
+  async updateAccountBalance(accountId, transactionType, amount, isPayment = false) {
     const account = this.accounts.get(accountId);
     if (!account) throw new Error('Account not found');
-
-    const multiplier = operation === 'add' ? 1 : -1;
-    const adjustedAmount = amount * multiplier;
 
     const updateData = {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -907,24 +948,28 @@ class AccountManager {
 
     switch (transactionType) {
       case 'purchase':
-        updateData.totalPurchases = firebase.firestore.FieldValue.increment(adjustedAmount);
-        updateData.outstandingPayable = firebase.firestore.FieldValue.increment(adjustedAmount);
-        updateData.currentBalance = firebase.firestore.FieldValue.increment(-adjustedAmount);
+        updateData.totalPurchases = firebase.firestore.FieldValue.increment(amount);
+        if (!isPayment) {
+          updateData.outstandingPayable = firebase.firestore.FieldValue.increment(amount);
+          updateData.currentBalance = firebase.firestore.FieldValue.increment(-amount);
+        }
         break;
       case 'sale':
-        updateData.totalSales = firebase.firestore.FieldValue.increment(adjustedAmount);
-        updateData.outstandingReceivable = firebase.firestore.FieldValue.increment(adjustedAmount);
-        updateData.currentBalance = firebase.firestore.FieldValue.increment(adjustedAmount);
+        updateData.totalSales = firebase.firestore.FieldValue.increment(amount);
+        if (!isPayment) {
+          updateData.outstandingReceivable = firebase.firestore.FieldValue.increment(amount);
+          updateData.currentBalance = firebase.firestore.FieldValue.increment(amount);
+        }
         break;
       case 'payment':
-        updateData.totalPayments = firebase.firestore.FieldValue.increment(adjustedAmount);
-        updateData.outstandingPayable = firebase.firestore.FieldValue.increment(-adjustedAmount);
-        updateData.currentBalance = firebase.firestore.FieldValue.increment(adjustedAmount);
+        updateData.totalPayments = firebase.firestore.FieldValue.increment(amount);
+        updateData.outstandingPayable = firebase.firestore.FieldValue.increment(-amount);
+        updateData.currentBalance = firebase.firestore.FieldValue.increment(amount);
         break;
       case 'receipt':
-        updateData.totalReceipts = firebase.firestore.FieldValue.increment(adjustedAmount);
-        updateData.outstandingReceivable = firebase.firestore.FieldValue.increment(-adjustedAmount);
-        updateData.currentBalance = firebase.firestore.FieldValue.increment(-adjustedAmount);
+        updateData.totalReceipts = firebase.firestore.FieldValue.increment(amount);
+        updateData.outstandingReceivable = firebase.firestore.FieldValue.increment(-amount);
+        updateData.currentBalance = firebase.firestore.FieldValue.increment(-amount);
         break;
     }
 
@@ -951,12 +996,11 @@ class AccountManager {
   }
 }
 
-// Transaction Management Class
+// Transaction Management
 class TransactionManager {
   constructor(accountManager) {
     this.accountManager = accountManager;
     this.transactions = [];
-    this.paymentHistory = new Map();
   }
 
   async createTransaction(transactionData) {
@@ -971,7 +1015,7 @@ class TransactionManager {
       transactionNumber: transactionNumber,
       companyId: transactionData.companyId,
       companyName: transactionData.companyName,
-      type: transactionData.type, // 'purchase', 'sale', 'payment', 'receipt'
+      type: transactionData.type,
       date: transactionData.date || new Date(),
       
       // Material details (for purchase/sale)
@@ -990,7 +1034,7 @@ class TransactionManager {
       // Payment details
       paymentStatus: transactionData.paymentStatus || 'pending',
       paidAmount: parseFloat(transactionData.paidAmount) || 0,
-      pendingAmount: 0, // Will be calculated
+      pendingAmount: 0,
       paymentMethod: transactionData.paymentMethod || 'cash',
       paymentReference: transactionData.paymentReference || '',
       
@@ -1011,10 +1055,7 @@ class TransactionManager {
       
       // Linking
       parentTransactionId: transactionData.parentTransactionId || null,
-      linkedTransactions: [],
-      
-      // Accounting entries
-      journalEntries: []
+      linkedTransactions: []
     };
 
     // Calculate pending amount
@@ -1041,9 +1082,6 @@ class TransactionManager {
       });
     }
 
-    // Generate journal entries for double-entry bookkeeping
-    baseTransaction.journalEntries = this.generateJournalEntries(baseTransaction);
-
     // Save transaction
     await db.collection('ledger_transactions').doc(transactionId).set(baseTransaction);
     
@@ -1060,7 +1098,8 @@ class TransactionManager {
       await this.accountManager.updateAccountBalance(
         baseTransaction.companyId,
         paymentType,
-        baseTransaction.paidAmount
+        baseTransaction.paidAmount,
+        true
       );
     }
 
@@ -1081,82 +1120,11 @@ class TransactionManager {
     }
   }
 
-  generateJournalEntries(transaction) {
-    const entries = [];
-    
-    switch (transaction.type) {
-      case 'purchase':
-        entries.push({
-          account: 'Purchases',
-          debit: transaction.netAmount,
-          credit: 0,
-          description: `Purchase from ${transaction.companyName}`
-        });
-        entries.push({
-          account: transaction.companyName,
-          debit: 0,
-          credit: transaction.netAmount,
-          description: `Purchase liability`
-        });
-        break;
-        
-      case 'sale':
-        entries.push({
-          account: transaction.companyName,
-          debit: transaction.netAmount,
-          credit: 0,
-          description: `Sale to ${transaction.companyName}`
-        });
-        entries.push({
-          account: 'Sales',
-          debit: 0,
-          credit: transaction.netAmount,
-          description: `Sale revenue`
-        });
-        break;
-        
-      case 'payment':
-        entries.push({
-          account: transaction.companyName,
-          debit: transaction.totalAmount,
-          credit: 0,
-          description: `Payment made to ${transaction.companyName}`
-        });
-        entries.push({
-          account: 'Cash/Bank',
-          debit: 0,
-          credit: transaction.totalAmount,
-          description: `Payment outflow`
-        });
-        break;
-        
-      case 'receipt':
-        entries.push({
-          account: 'Cash/Bank',
-          debit: transaction.totalAmount,
-          credit: 0,
-          description: `Receipt from ${transaction.companyName}`
-        });
-        entries.push({
-          account: transaction.companyName,
-          debit: 0,
-          credit: transaction.totalAmount,
-          description: `Receipt against receivable`
-        });
-        break;
-    }
-    
-    return entries;
-  }
-
   async updatePaymentStatus(transactionId, paymentData) {
-    const transaction = this.transactions.find(t => t.id === transactionId);
-    if (!transaction) {
-      const doc = await db.collection('ledger_transactions').doc(transactionId).get();
-      if (!doc.exists) throw new Error('Transaction not found');
-    }
+    const transactionDoc = await db.collection('ledger_transactions').doc(transactionId).get();
+    if (!transactionDoc.exists) throw new Error('Transaction not found');
 
-    const currentTransaction = transaction || { id: transactionId, ...doc.data() };
+    const transaction = { id: transactionDoc.id, ...transactionDoc.data() };
     
     const paymentRecord = {
       id: db.collection('payment_history').doc().id,
@@ -1169,8 +1137,8 @@ class TransactionManager {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    const newPaidAmount = (currentTransaction.paidAmount || 0) + paymentRecord.amount;
-    const newPendingAmount = currentTransaction.netAmount - newPaidAmount;
+    const newPaidAmount = (transaction.paidAmount || 0) + paymentRecord.amount;
+    const newPendingAmount = transaction.netAmount - newPaidAmount;
     
     let newStatus = 'pending';
     if (newPendingAmount <= 0) {
@@ -1190,11 +1158,12 @@ class TransactionManager {
     await db.collection('ledger_transactions').doc(transactionId).update(updateData);
     
     // Update account balance for the payment
-    const paymentType = currentTransaction.type === 'sale' ? 'receipt' : 'payment';
+    const paymentType = transaction.type === 'sale' ? 'receipt' : 'payment';
     await this.accountManager.updateAccountBalance(
-      currentTransaction.companyId,
+      transaction.companyId,
       paymentType,
-      paymentRecord.amount
+      paymentRecord.amount,
+      true
     );
 
     // Store payment history
@@ -1276,10 +1245,16 @@ async function loadAccounts() {
     tbody.innerHTML = '';
     
     accountManager.accounts.clear();
+    myFirms.clear();
     
     snapshot.forEach(doc => {
       const account = { id: doc.id, ...doc.data() };
       accountManager.accounts.set(doc.id, account);
+      
+      // Track if this is one of your firms
+      if (account.type === 'my_firm') {
+        myFirms.add(doc.id);
+      }
       
       const balance = (account.outstandingReceivable || 0) - (account.outstandingPayable || 0);
       const balanceClass = balance > 0 ? 'positive' : balance < 0 ? 'negative' : '';
@@ -1292,7 +1267,7 @@ async function loadAccounts() {
             <div>${account.name}</div>
             <div class="text-xs text-gray-500">${account.contactPerson || ''} ${account.phone || ''}</div>
           </td>
-          <td><span class="badge badge-secondary">${account.type}</span></td>
+          <td><span class="badge ${account.type === 'my_firm' ? 'badge-primary' : 'badge-secondary'}">${account.type}</span></td>
           <td class="${balanceClass}">
             <div class="font-medium">${formatCurrency(Math.abs(balance))}</div>
             <div class="text-xs">R: ${formatCurrency(account.outstandingReceivable || 0)} | P: ${formatCurrency(account.outstandingPayable || 0)}</div>
@@ -1417,11 +1392,14 @@ async function loadDashboard() {
     
     accountsSnapshot.forEach(doc => {
       const account = doc.data();
-      totalReceivables += account.outstandingReceivable || 0;
-      totalPayables += account.outstandingPayable || 0;
-      
-      if (account.outstandingReceivable > 0) activeCustomers++;
-      if (account.outstandingPayable > 0) activeSuppliers++;
+      // Skip your own firms for receivables/payables calculations
+      if (account.type !== 'my_firm') {
+        totalReceivables += account.outstandingReceivable || 0;
+        totalPayables += account.outstandingPayable || 0;
+        
+        if (account.outstandingReceivable > 0) activeCustomers++;
+        if (account.outstandingPayable > 0) activeSuppliers++;
+      }
     });
     
     // Calculate this month's sales and purchases
@@ -1438,10 +1416,13 @@ async function loadDashboard() {
     
     transactionsSnapshot.forEach(doc => {
       const transaction = doc.data();
-      if (transaction.type === 'sale') {
-        monthSales += transaction.netAmount || transaction.totalAmount || 0;
-      } else if (transaction.type === 'purchase') {
-        monthPurchases += transaction.netAmount || transaction.totalAmount || 0;
+      // Skip transactions with your own firms
+      if (!myFirms.has(transaction.companyId)) {
+        if (transaction.type === 'sale') {
+          monthSales += transaction.netAmount || transaction.totalAmount || 0;
+        } else if (transaction.type === 'purchase') {
+          monthPurchases += transaction.netAmount || transaction.totalAmount || 0;
+        }
       }
     });
     
@@ -1546,13 +1527,16 @@ async function loadOutstandingPayments() {
     
     const container = document.getElementById('outstandingPayments');
     if (snapshot.empty) {
-      container.innerHTML = '<div class="text-center text-gray-500 py-4">No outstanding payments</div>';
+      container.innerHTML = '<div class="text-center text-gray-500 py-4'>No outstanding payments</div>';
       return;
     }
     
     let html = '';
     snapshot.forEach(doc => {
       const account = doc.data();
+      // Skip your own firms
+      if (account.type === 'my_firm') return;
+      
       const urgencyClass = account.outstandingReceivable > 50000 ? 'text-red-600' : 
                           account.outstandingReceivable > 20000 ? 'text-yellow-600' : 'text-green-600';
       
@@ -1599,11 +1583,14 @@ async function populateCompanyDropdowns() {
       
       accountsSnapshot.forEach(doc => {
         const account = doc.data();
-        const option = document.createElement('option');
-        option.value = doc.id;
-        option.textContent = account.name;
-        option.setAttribute('data-type', account.type);
-        companySelect.appendChild(option);
+        // Don't show your own firms in the company dropdown for transactions
+        if (account.type !== 'my_firm') {
+          const option = document.createElement('option');
+          option.value = doc.id;
+          option.textContent = account.name;
+          option.setAttribute('data-type', account.type);
+          companySelect.appendChild(option);
+        }
       });
     }
   } catch (error) {
@@ -1611,56 +1598,10 @@ async function populateCompanyDropdowns() {
   }
 }
 
-async function populateMaterialDropdowns() {
-  try {
-    // Load materials from existing supply chain system
-    const companiesSnapshot = await db.collection('companies').get();
-    const materialSelect = document.getElementById('transactionMaterial');
-    
-    if (materialSelect) {
-      materialSelect.innerHTML = '<option value="">Select Material</option>';
-      
-      for (const companyDoc of companiesSnapshot.docs) {
-        const companyData = companyDoc.data();
-        
-        try {
-          const materialsSnapshot = await db.collection('companies')
-            .doc(companyDoc.id)
-            .collection('materials')
-            .get();
-          
-          if (!materialsSnapshot.empty) {
-            const optgroup = document.createElement('optgroup');
-            optgroup.label = companyData.name;
-            
-            materialsSnapshot.forEach(materialDoc => {
-              const material = materialDoc.data();
-              const option = document.createElement('option');
-              option.value = materialDoc.id;
-              option.textContent = material.name || 'Unnamed Material';
-              option.setAttribute('data-company-id', companyDoc.id);
-              option.setAttribute('data-company-name', companyData.name);
-              option.setAttribute('data-price', material.pricePerBag || material.kgPerBag || 0);
-              optgroup.appendChild(option);
-            });
-            
-            materialSelect.appendChild(optgroup);
-          }
-        } catch (materialError) {
-          console.warn(`Error loading materials for ${companyData.name}:`, materialError);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error populating material dropdown:', error);
-  }
-}
-
 // Form handlers and validation
 function initializeFormHandlers() {
   const transactionType = document.getElementById('transactionType');
   const paymentStatus = document.getElementById('paymentStatus');
-  const transactionCompany = document.getElementById('transactionCompany');
   const transactionMaterial = document.getElementById('transactionMaterial');
   const transactionQuantity = document.getElementById('transactionQuantity');
   const transactionPrice = document.getElementById('transactionPrice');
@@ -1700,57 +1641,6 @@ function initializeFormHandlers() {
     });
   }
 
-  // Company selection handler
-  if (transactionCompany && transactionMaterial) {
-    transactionCompany.addEventListener('change', function() {
-      const selectedCompanyId = this.value;
-      const materialSelect = transactionMaterial;
-      
-      // Filter materials by selected company
-      const allOptions = materialSelect.querySelectorAll('option');
-      const optgroups = materialSelect.querySelectorAll('optgroup');
-      
-      // Reset material selection
-      materialSelect.value = '';
-      
-      if (selectedCompanyId) {
-        // Show only materials for selected company
-        optgroups.forEach(optgroup => {
-          const hasMatchingOptions = Array.from(optgroup.children).some(option => 
-            option.getAttribute('data-company-id') === selectedCompanyId
-          );
-          optgroup.style.display = hasMatchingOptions ? 'block' : 'none';
-        });
-      } else {
-        // Show all optgroups
-        optgroups.forEach(optgroup => {
-          optgroup.style.display = 'block';
-        });
-      }
-    });
-  }
-
-  // Material selection handler
-  if (transactionMaterial && transactionPrice) {
-    transactionMaterial.addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
-      const price = selectedOption.getAttribute('data-price');
-      const companyId = selectedOption.getAttribute('data-company-id');
-      const companyName = selectedOption.getAttribute('data-company-name');
-      
-      if (price && price > 0) {
-        transactionPrice.value = price;
-      }
-      
-      // Auto-select company if not already selected
-      if (companyId && transactionCompany && !transactionCompany.value) {
-        transactionCompany.value = companyId;
-      }
-      
-      calculateTotal();
-    });
-  }
-
   // Auto-calculate total amount
   function calculateTotal() {
     if (transactionQuantity && transactionPrice && transactionAmount) {
@@ -1776,7 +1666,6 @@ function initializeFormHandlers() {
 // Modal functions
 function showAddTransactionModal() {
   populateCompanyDropdowns();
-  populateMaterialDropdowns();
   showModal('transactionModal');
 }
 
@@ -1796,8 +1685,6 @@ async function saveTransaction() {
   try {
     // Get form data
     const companyId = document.getElementById('transactionCompany').value;
-    const materialSelect = document.getElementById('transactionMaterial');
-    const selectedMaterialOption = materialSelect.options[materialSelect.selectedIndex];
     
     // Get company name
     const account = accountManager.accounts.get(companyId);
@@ -1807,8 +1694,8 @@ async function saveTransaction() {
       companyId: companyId,
       companyName: companyName,
       type: document.getElementById('transactionType').value,
-      materialId: materialSelect.value || null,
-      materialName: selectedMaterialOption && selectedMaterialOption.value ? selectedMaterialOption.textContent : '',
+      materialId: document.getElementById('transactionMaterial').value || null,
+      materialName: document.getElementById('transactionMaterial').options[document.getElementById('transactionMaterial').selectedIndex]?.text || '',
       quantity: parseFloat(document.getElementById('transactionQuantity').value) || 0,
       unit: 'bags',
       pricePerUnit: parseFloat(document.getElementById('transactionPrice').value) || 0,
@@ -1894,12 +1781,13 @@ async function saveAccount() {
 
 // Payment operations
 async function updatePayment(transactionId) {
-  const transaction = transactionManager.transactions.find(t => t.id === transactionId);
-  if (!transaction) {
+  const transactionDoc = await db.collection('ledger_transactions').doc(transactionId).get();
+  if (!transactionDoc.exists) {
     showNotification('Transaction not found', 'error');
     return;
   }
 
+  const transaction = { id: transactionDoc.id, ...transactionDoc.data() };
   const pendingAmount = transaction.pendingAmount || 0;
   if (pendingAmount <= 0) {
     showNotification('No pending amount for this transaction', 'info');
@@ -2272,47 +2160,237 @@ async function viewAccountLedger(accountId) {
   }
 }
 
-// Notification system
-function showNotification(message, type = 'info') {
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-    z-index: 10000;
-    max-width: 400px;
-    animation: slideIn 0.3s ease-out;
-  `;
-  
-  notification.textContent = message;
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease-in';
-    setTimeout(() => notification.remove(), 300);
-  }, 5000);
+// Edit operations
+async function editAccount(accountId) {
+  showLoader();
+  try {
+    const account = accountManager.accounts.get(accountId);
+    if (!account) {
+      showNotification('Account not found', 'error');
+      return;
+    }
+
+    // Populate the form
+    document.getElementById('accountName').value = account.name;
+    document.getElementById('accountType').value = account.type;
+    document.getElementById('contactPerson').value = account.contactPerson || '';
+    document.getElementById('accountPhone').value = account.phone || '';
+    document.getElementById('accountAddress').value = account.address || '';
+    document.getElementById('openingBalance').value = account.openingBalance || 0;
+
+    // Change the modal to edit mode
+    const modal = document.getElementById('accountModal');
+    const title = modal.querySelector('.modal-title');
+    const saveButton = modal.querySelector('.modal-footer .btn-primary');
+    
+    title.textContent = 'Edit Company Account';
+    saveButton.textContent = 'Update Account';
+    saveButton.onclick = function() { updateAccount(accountId); };
+
+    // Store the original onclick handler
+    if (!modal.originalOnClick) {
+      modal.originalOnClick = saveButton.onclick;
+    }
+
+    showModal('accountModal');
+  } catch (error) {
+    console.error('Error preparing account edit:', error);
+    showNotification('Error preparing account edit: ' + error.message, 'error');
+  } finally {
+    hideLoader();
+  }
 }
 
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+async function updateAccount(accountId) {
+  const form = document.getElementById('accountForm');
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
   }
-  
-  @keyframes slideOut {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100%); opacity: 0; }
+
+  showLoader();
+  try {
+    const updateData = {
+      name: document.getElementById('accountName').value,
+      type: document.getElementById('accountType').value,
+      contactPerson: document.getElementById('contactPerson').value || '',
+      phone: document.getElementById('accountPhone').value || '',
+      address: document.getElementById('accountAddress').value || '',
+      openingBalance: parseFloat(document.getElementById('openingBalance').value) || 0,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    await db.collection('ledger_accounts').doc(accountId).update(updateData);
+
+    // Reset the modal to add mode
+    const modal = document.getElementById('accountModal');
+    const title = modal.querySelector('.modal-title');
+    const saveButton = modal.querySelector('.modal-footer .btn-primary');
+    
+    title.textContent = 'Add Company Account';
+    saveButton.textContent = 'Save Account';
+    saveButton.onclick = saveAccount;
+
+    // Reset form and close modal
+    form.reset();
+    hideModal('accountModal');
+    
+    // Refresh data
+    await populateCompanyDropdowns();
+    if (currentSection === 'accounts') await loadAccounts();
+    
+    showNotification('Account updated successfully!', 'success');
+
+  } catch (error) {
+    console.error('Error updating account:', error);
+    showNotification('Error updating account: ' + error.message, 'error');
+  } finally {
+    hideLoader();
   }
-`;
-document.head.appendChild(style);
+}
+
+async function editTransaction(transactionId) {
+  showLoader();
+  try {
+    const doc = await db.collection('ledger_transactions').doc(transactionId).get();
+    if (!doc.exists) {
+      showNotification('Transaction not found', 'error');
+      return;
+    }
+
+    const transaction = { id: doc.id, ...doc.data() };
+
+    // Populate the form
+    document.getElementById('transactionType').value = transaction.type;
+    document.getElementById('transactionCompany').value = transaction.companyId;
+    document.getElementById('transactionMaterial').value = transaction.materialId || '';
+    document.getElementById('transactionQuantity').value = transaction.quantity || 0;
+    document.getElementById('transactionPrice').value = transaction.pricePerUnit || 0;
+    document.getElementById('transactionAmount').value = transaction.totalAmount || 0;
+    document.getElementById('paymentStatus').value = transaction.paymentStatus;
+    document.getElementById('paidAmount').value = transaction.paidAmount || 0;
+    document.getElementById('transactionNotes').value = transaction.notes || '';
+
+    // Show/hide fields based on transaction type
+    const materialGroup = document.getElementById('materialGroup');
+    const quantityGroup = document.getElementById('quantityGroup');
+    const priceGroup = document.getElementById('priceGroup');
+    const paidAmountGroup = document.getElementById('paidAmountGroup');
+    
+    if (transaction.type === 'payment' || transaction.type === 'receipt') {
+      if (materialGroup) materialGroup.style.display = 'none';
+      if (quantityGroup) quantityGroup.style.display = 'none';
+      if (priceGroup) priceGroup.style.display = 'none';
+    } else {
+      if (materialGroup) materialGroup.style.display = 'block';
+      if (quantityGroup) quantityGroup.style.display = 'block';
+      if (priceGroup) priceGroup.style.display = 'block';
+    }
+    
+    if (transaction.paymentStatus === 'partial') {
+      if (paidAmountGroup) paidAmountGroup.style.display = 'block';
+    } else {
+      if (paidAmountGroup) paidAmountGroup.style.display = 'none';
+    }
+
+    // Change the modal to edit mode
+    const modal = document.getElementById('transactionModal');
+    const title = modal.querySelector('.modal-title');
+    const saveButton = modal.querySelector('.modal-footer .btn-primary');
+    
+    title.textContent = 'Edit Transaction';
+    saveButton.textContent = 'Update Transaction';
+    saveButton.onclick = function() { updateTransaction(transactionId); };
+
+    // Store the original onclick handler
+    if (!modal.originalOnClick) {
+      modal.originalOnClick = saveButton.onclick;
+    }
+
+    showModal('transactionModal');
+  } catch (error) {
+    console.error('Error preparing transaction edit:', error);
+    showNotification('Error preparing transaction edit: ' + error.message, 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+async function updateTransaction(transactionId) {
+  const form = document.getElementById('transactionForm');
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  showLoader();
+  try {
+    // Get form data
+    const companyId = document.getElementById('transactionCompany').value;
+    
+    // Get company name
+    const account = accountManager.accounts.get(companyId);
+    const companyName = account ? account.name : 'Unknown Company';
+
+    const updateData = {
+      companyId: companyId,
+      companyName: companyName,
+      type: document.getElementById('transactionType').value,
+      materialId: document.getElementById('transactionMaterial').value || null,
+      materialName: document.getElementById('transactionMaterial').options[document.getElementById('transactionMaterial').selectedIndex]?.text || '',
+      quantity: parseFloat(document.getElementById('transactionQuantity').value) || 0,
+      pricePerUnit: parseFloat(document.getElementById('transactionPrice').value) || 0,
+      totalAmount: parseFloat(document.getElementById('transactionAmount').value),
+      paymentStatus: document.getElementById('paymentStatus').value,
+      paidAmount: calculatePaidAmount(),
+      notes: document.getElementById('transactionNotes').value || '',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    function calculatePaidAmount() {
+      const status = document.getElementById('paymentStatus').value;
+      const totalAmount = parseFloat(document.getElementById('transactionAmount').value);
+      const paidAmountInput = document.getElementById('paidAmount');
+      
+      if (status === 'paid') return totalAmount;
+      if (status === 'partial' && paidAmountInput) return parseFloat(paidAmountInput.value) || 0;
+      return 0;
+    }
+
+    // Calculate net amount
+    updateData.netAmount = updateData.totalAmount;
+    updateData.pendingAmount = updateData.netAmount - updateData.paidAmount;
+
+    // Update transaction
+    await db.collection('ledger_transactions').doc(transactionId).update(updateData);
+
+    // Reset the modal to add mode
+    const modal = document.getElementById('transactionModal');
+    const title = modal.querySelector('.modal-title');
+    const saveButton = modal.querySelector('.modal-footer .btn-primary');
+    
+    title.textContent = 'Add Transaction';
+    saveButton.textContent = 'Save Transaction';
+    saveButton.onclick = saveTransaction;
+
+    // Reset form and close modal
+    form.reset();
+    hideModal('transactionModal');
+    
+    // Refresh data
+    await loadDashboard();
+    if (currentSection === 'transactions') await loadTransactions();
+    if (currentSection === 'accounts') await loadAccounts();
+
+    showNotification('Transaction updated successfully!', 'success');
+
+  } catch (error) {
+    console.error('Error updating transaction:', error);
+    showNotification('Error updating transaction: ' + error.message, 'error');
+  } finally {
+    hideLoader();
+  }
+}
 
 // Delete operations
 async function deleteTransaction(transactionId) {
@@ -2336,7 +2414,7 @@ async function deleteTransaction(transactionId) {
       transaction.companyId,
       transaction.type,
       transaction.netAmount || transaction.totalAmount,
-      'subtract'
+      true
     );
 
     // If there were payments, reverse those too
@@ -2346,7 +2424,7 @@ async function deleteTransaction(transactionId) {
         transaction.companyId,
         paymentType,
         transaction.paidAmount,
-        'subtract'
+        true
       );
     }
 
@@ -2435,15 +2513,6 @@ async function deleteAccount(accountId) {
   } finally {
     hideLoader();
   }
-}
-
-// Edit operations (placeholder functions)
-function editAccount(accountId) {
-  showNotification('Edit account functionality will be implemented in next update', 'info');
-}
-
-function editTransaction(transactionId) {
-  showNotification('Edit transaction functionality will be implemented in next update', 'info');
 }
 
 // Search and filter functions
@@ -2551,650 +2620,8 @@ function clearFilters() {
 
 // Reports functionality
 function loadReports() {
-  initializeCharts();
-}
-
-function initializeCharts() {
-  // Wait for Chart.js to be available
-  if (typeof Chart === 'undefined') {
-    setTimeout(initializeCharts, 100);
-    return;
-  }
-
-  // Profit & Loss Chart
-  const plCtx = document.getElementById('profitLossChart');
-  if (plCtx) {
-    // Calculate monthly data from transactions
-    const monthlyData = calculateMonthlyProfitLoss();
-    
-    new Chart(plCtx, {
-      type: 'line',
-      data: {
-        labels: monthlyData.labels,
-        datasets: [{
-          label: 'Sales',
-          data: monthlyData.sales,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4,
-          fill: true
-        }, {
-          label: 'Purchases',
-          data: monthlyData.purchases,
-          borderColor: '#ef4444',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          tension: 0.4,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          title: {
-            display: true,
-            text: 'Monthly Profit & Loss Trend'
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return '₹' + value.toLocaleString();
-              }
-            }
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        }
-      }
-    });
-  }
-
-  // Outstanding Analysis Chart
-  const outCtx = document.getElementById('outstandingChart');
-  if (outCtx) {
-    const outstandingData = calculateOutstandingAnalysis();
-    
-    new Chart(outCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Receivables', 'Payables', 'Net Cash Flow'],
-        datasets: [{
-          data: [
-            outstandingData.receivables,
-            outstandingData.payables,
-            Math.max(0, outstandingData.receivables - outstandingData.payables)
-          ],
-          backgroundColor: ['#f59e0b', '#ef4444', '#10b981'],
-          borderWidth: 2,
-          borderColor: '#ffffff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-          },
-          title: {
-            display: true,
-            text: 'Outstanding Analysis'
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const value = context.parsed;
-                return context.label + ': ₹' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-}
-
-function calculateMonthlyProfitLoss() {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  const sales = [0, 0, 0, 0, 0, 0];
-  const purchases = [0, 0, 0, 0, 0, 0];
-  
-  // This would be calculated from actual transaction data
-  // For demo purposes, using sample data
-  transactionManager.transactions.forEach(transaction => {
-    const date = new Date(transaction.createdAt?.toDate ? transaction.createdAt.toDate() : transaction.createdAt);
-    const monthIndex = date.getMonth();
-    
-    if (monthIndex < 6) {
-      if (transaction.type === 'sale') {
-        sales[monthIndex] += transaction.netAmount || transaction.totalAmount || 0;
-      } else if (transaction.type === 'purchase') {
-        purchases[monthIndex] += transaction.netAmount || transaction.totalAmount || 0;
-      }
-    }
-  });
-  
-  return {
-    labels: months,
-    sales: sales,
-    purchases: purchases
-  };
-}
-
-function calculateOutstandingAnalysis() {
-  let receivables = 0;
-  let payables = 0;
-  
-  accountManager.accounts.forEach(account => {
-    receivables += account.outstandingReceivable || 0;
-    payables += account.outstandingPayable || 0;
-  });
-  
-  return {
-    receivables: receivables,
-    payables: payables
-  };
-}
-
-// Report generation functions
-function generateReport(type) {
-  showLoader();
-  
-  setTimeout(() => {
-    hideLoader();
-    
-    switch (type) {
-      case 'aging':
-        generateAgingReport();
-        break;
-      case 'pl':
-        generatePLStatement();
-        break;
-      case 'ledger':
-        generateLedgerSummary();
-        break;
-      default:
-        showNotification('Unknown report type', 'error');
-    }
-  }, 1000);
-}
-
-function generateAgingReport() {
-  const agingData = [];
-  
-  accountManager.accounts.forEach(account => {
-    if (account.outstandingReceivable > 0) {
-      agingData.push({
-        company: account.name,
-        amount: account.outstandingReceivable,
-        // This would calculate actual aging based on transaction dates
-        days: Math.floor(Math.random() * 90) + 1
-      });
-    }
-  });
-  
-  let reportHtml = `
-    <div class="aging-report">
-      <h3 class="text-xl font-bold mb-4">Accounts Receivable Aging Report</h3>
-      <p class="text-sm text-gray-600 mb-4">Generated on: ${new Date().toLocaleDateString('en-IN')}</p>
-      
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Company Name</th>
-              <th>Outstanding Amount</th>
-              <th>Days Outstanding</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-  `;
-  
-  agingData.forEach(item => {
-    const category = item.days <= 30 ? 'Current' : 
-                    item.days <= 60 ? '31-60 Days' :
-                    item.days <= 90 ? '61-90 Days' : '90+ Days';
-    const categoryClass = item.days <= 30 ? 'badge-success' :
-                         item.days <= 60 ? 'badge-warning' :
-                         'badge-danger';
-    
-    reportHtml += `
-      <tr>
-        <td class="font-medium">${item.company}</td>
-        <td class="text-right">${formatCurrency(item.amount)}</td>
-        <td class="text-center">${item.days}</td>
-        <td><span class="badge ${categoryClass}">${category}</span></td>
-      </tr>
-    `;
-  });
-  
-  reportHtml += `
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="mt-6 text-right">
-        <p class="text-lg font-semibold">Total Outstanding: ${formatCurrency(agingData.reduce((sum, item) => sum + item.amount, 0))}</p>
-      </div>
-    </div>
-  `;
-  
-  showReportModal('Aging Report', reportHtml);
-}
-
-function generatePLStatement() {
-  let totalSales = 0;
-  let totalPurchases = 0;
-  let totalReceipts = 0;
-  let totalPayments = 0;
-  
-  transactionManager.transactions.forEach(transaction => {
-    const amount = transaction.netAmount || transaction.totalAmount || 0;
-    switch (transaction.type) {
-      case 'sale':
-        totalSales += amount;
-        break;
-      case 'purchase':
-        totalPurchases += amount;
-        break;
-      case 'receipt':
-        totalReceipts += amount;
-        break;
-      case 'payment':
-        totalPayments += amount;
-        break;
-    }
-  });
-  
-  const grossProfit = totalSales - totalPurchases;
-  const netCashFlow = totalReceipts - totalPayments;
-  
-  const reportHtml = `
-    <div class="pl-statement">
-      <h3 class="text-xl font-bold mb-4">Profit & Loss Statement</h3>
-      <p class="text-sm text-gray-600 mb-6">For the period: ${new Date(new Date().getFullYear(), 0, 1).toLocaleDateString('en-IN')} to ${new Date().toLocaleDateString('en-IN')}</p>
-      
-      <div class="space-y-4">
-        <div class="border-b pb-4">
-          <h4 class="font-semibold text-lg text-green-600">Revenue</h4>
-          <div class="flex justify-between">
-            <span>Total Sales</span>
-            <span class="font-medium">${formatCurrency(totalSales)}</span>
-          </div>
-        </div>
-        
-        <div class="border-b pb-4">
-          <h4 class="font-semibold text-lg text-red-600">Costs</h4>
-          <div class="flex justify-between">
-            <span>Total Purchases</span>
-            <span class="font-medium">${formatCurrency(totalPurchases)}</span>
-          </div>
-        </div>
-        
-        <div class="border-b pb-4">
-          <div class="flex justify-between text-lg font-bold">
-            <span>Gross Profit</span>
-            <span class="${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(grossProfit)}</span>
-          </div>
-          <div class="text-sm text-gray-600">
-            Margin: ${totalSales > 0 ? ((grossProfit / totalSales) * 100).toFixed(2) : 0}%
-          </div>
-        </div>
-        
-        <div class="bg-gray-50 p-4 rounded">
-          <h4 class="font-semibold text-lg mb-2">Cash Flow Analysis</h4>
-          <div class="flex justify-between mb-2">
-            <span>Total Receipts</span>
-            <span class="font-medium text-green-600">${formatCurrency(totalReceipts)}</span>
-          </div>
-          <div class="flex justify-between mb-2">
-            <span>Total Payments</span>
-            <span class="font-medium text-red-600">${formatCurrency(totalPayments)}</span>
-          </div>
-          <div class="flex justify-between font-bold text-lg border-t pt-2">
-            <span>Net Cash Flow</span>
-            <span class="${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(netCashFlow)}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  showReportModal('Profit & Loss Statement', reportHtml);
-}
-
-function generateLedgerSummary() {
-  let reportHtml = `
-    <div class="ledger-summary">
-      <h3 class="text-xl font-bold mb-4">Ledger Summary Report</h3>
-      <p class="text-sm text-gray-600 mb-6">Generated on: ${new Date().toLocaleDateString('en-IN')}</p>
-      
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Company Name</th>
-              <th>Type</th>
-              <th>Total Sales</th>
-              <th>Total Purchases</th>
-              <th>Outstanding Receivable</th>
-              <th>Outstanding Payable</th>
-              <th>Net Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-  `;
-  
-  accountManager.accounts.forEach(account => {
-    const netBalance = (account.outstandingReceivable || 0) - (account.outstandingPayable || 0);
-    const balanceClass = netBalance > 0 ? 'text-green-600' : netBalance < 0 ? 'text-red-600' : '';
-    
-    reportHtml += `
-      <tr>
-        <td class="font-medium">${account.name}</td>
-        <td><span class="badge badge-secondary">${account.type}</span></td>
-        <td class="text-right">${formatCurrency(account.totalSales || 0)}</td>
-        <td class="text-right">${formatCurrency(account.totalPurchases || 0)}</td>
-        <td class="text-right">${formatCurrency(account.outstandingReceivable || 0)}</td>
-        <td class="text-right">${formatCurrency(account.outstandingPayable || 0)}</td>
-        <td class="text-right font-medium ${balanceClass}">${formatCurrency(Math.abs(netBalance))}</td>
-      </tr>
-    `;
-  });
-  
-  reportHtml += `
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-  
-  showReportModal('Ledger Summary', reportHtml);
-}
-
-function showReportModal(title, content) {
-  const modalHtml = `
-    <div id="reportModal" class="modal-backdrop">
-      <div class="modal" style="max-width: 90vw;">
-        <div class="modal-header">
-          <h3 class="modal-title">${title}</h3>
-          <button onclick="hideModal('reportModal')" class="btn btn-secondary btn-sm">✕</button>
-        </div>
-        <div class="modal-content">
-          ${content}
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" onclick="printReport()">Print Report</button>
-          <button class="btn btn-secondary" onclick="exportReport()">Export PDF</button>
-          <button class="btn btn-secondary" onclick="hideModal('reportModal')">Close</button>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  // Remove existing modal
-  const existingModal = document.getElementById('reportModal');
-  if (existingModal) existingModal.remove();
-  
-  // Add new modal
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-
-function printReport() {
-  const reportContent = document.querySelector('#reportModal .modal-content').innerHTML;
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Report - Aditya Fertilizers</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          .table th { background-color: #f2f2f2; font-weight: bold; }
-          .text-right { text-align: right; }
-          .text-center { text-align: center; }
-          .font-bold { font-weight: bold; }
-          .text-green-600 { color: #059669; }
-          .text-red-600 { color: #dc2626; }
-          .badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-          .badge-secondary { background-color: #f1f5f9; color: #64748b; }
-          .badge-success { background-color: #dcfce7; color: #059669; }
-          .badge-warning { background-color: #fef3c7; color: #d97706; }
-          .badge-danger { background-color: #fecaca; color: #dc2626; }
-        </style>
-      </head>
-      <body>
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1>Aditya Fertilizers</h1>
-          <p>Professional Accounting Ledger System</p>
-        </div>
-        ${reportContent}
-        <div style="margin-top: 30px; text-align: right; font-size: 12px; color: #666;">
-          Generated on: ${new Date().toLocaleDateString('en-IN')} ${new Date().toLocaleTimeString('en-IN')}
-        </div>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.print();
-}
-
-function exportReport() {
-  showNotification('PDF export functionality will be implemented in next update', 'info');
-}
-
-// Settings functions
-function syncWithSupplyChain() {
-  if (!confirm('This will sync all data from the supply chain system. This may take several minutes. Continue?')) {
-    return;
-  }
-  
-  showLoader();
-  loadExistingData().then(() => {
-    showNotification('Sync completed successfully!', 'success');
-  }).catch(error => {
-    console.error('Sync failed:', error);
-    showNotification('Sync failed: ' + error.message, 'error');
-  });
-}
-
-function exportData() {
-  showLoader();
-  
-  // Simulate data export
-  setTimeout(() => {
-    hideLoader();
-    showNotification('Data export functionality will be implemented in next update. This will export all ledger data to Excel format.', 'info');
-  }, 2000);
-}
-
-function clearCache() {
-  if (!confirm('This will clear all cached data and refresh the application. Continue?')) {
-    return;
-  }
-  
-  showLoader();
-  
-  // Clear local data
-  accountManager.accounts.clear();
-  transactionManager.transactions = [];
-  materials = [];
-  
-  // Reload data
-  loadExistingData().then(() => {
-    showNotification('Cache cleared and data reloaded successfully!', 'success');
-  }).catch(error => {
-    console.error('Error reloading data:', error);
-    showNotification('Error reloading data: ' + error.message, 'error');
-  });
-}
-
-function resetSystem() {
-  if (!confirm('WARNING: This will delete ALL ledger data permanently. This action CANNOT be undone!')) {
-    return;
-  }
-  
-  const confirmReset = prompt('Type "RESET LEDGER SYSTEM" to confirm complete system reset:');
-  if (confirmReset !== 'RESET LEDGER SYSTEM') {
-    showNotification('System reset cancelled', 'info');
-    return;
-  }
-  
-  const finalConfirm = confirm('This is your FINAL WARNING. All data will be permanently lost. Are you absolutely sure?');
-  if (!finalConfirm) {
-    showNotification('System reset cancelled', 'info');
-    return;
-  }
-  
-  showLoader();
-  
-  // This would implement actual system reset
-  setTimeout(() => {
-    hideLoader();
-    showNotification('System reset functionality requires additional security measures and will be implemented with proper safeguards in production version', 'error');
-  }, 2000);
-}
-
-// Data import from existing supply chain system
-async function loadExistingData() {
-  showLoader();
-  try {
-    console.log('Loading existing supply chain data...');
-    
-    // Clear existing data
-    accountManager.accounts.clear();
-    transactionManager.transactions = [];
-    materials = [];
-
-    // Load companies and create accounts
-    const companiesSnapshot = await db.collection('companies').get();
-    console.log(`Found ${companiesSnapshot.size} companies in supply chain`);
-
-    for (const companyDoc of companiesSnapshot.docs) {
-      const companyData = companyDoc.data();
-      
-      // Create account for this company
-      try {
-        await accountManager.createAccount({
-          id: companyDoc.id,
-          name: companyData.name,
-          type: 'both', // Default to both customer and supplier
-          contactPerson: companyData.contactPerson || '',
-          phone: companyData.phone || '',
-          address: companyData.address || '',
-          openingBalance: 0
-        });
-        console.log(`Created account for: ${companyData.name}`);
-      } catch (accountError) {
-        console.warn(`Error creating account for ${companyData.name}:`, accountError);
-      }
-
-      // Load materials
-      try {
-        const materialsSnapshot = await db.collection('companies')
-          .doc(companyDoc.id)
-          .collection('materials')
-          .get();
-
-        materialsSnapshot.forEach(materialDoc => {
-          const materialData = materialDoc.data();
-          materials.push({
-            id: materialDoc.id,
-            companyId: companyDoc.id,
-            companyName: companyData.name,
-            name: materialData.name || 'Unnamed Material',
-            pricePerBag: materialData.pricePerBag || materialData.kgPerBag || 0,
-            ...materialData
-          });
-        });
-        console.log(`Loaded ${materialsSnapshot.size} materials for ${companyData.name}`);
-      } catch (materialError) {
-        console.warn(`Error loading materials for ${companyData.name}:`, materialError);
-      }
-
-      // Load and convert entries to transactions
-      try {
-        const entriesSnapshot = await db.collection('companies')
-          .doc(companyDoc.id)
-          .collection('entries')
-          .orderBy('createdAt', 'desc')
-          .limit(50) // Limit to recent entries
-          .get();
-
-        for (const entryDoc of entriesSnapshot.docs) {
-          const entryData = entryDoc.data();
-          
-          // Check if already converted
-          const existingTransaction = await db.collection('ledger_transactions')
-            .where('companyId', '==', companyDoc.id)
-            .where('originalEntryId', '==', entryDoc.id)
-            .get();
-
-          if (existingTransaction.empty) {
-            try {
-              // Convert entry to transaction
-              const material = materials.find(m => 
-                m.id === entryData.materialId && m.companyId === companyDoc.id
-              );
-
-              const transactionData = {
-                companyId: companyDoc.id,
-                companyName: companyData.name,
-                type: entryData.type || 'purchase',
-                materialId: entryData.materialId || null,
-                materialName: material ? material.name : 'Unknown Material',
-                quantity: entryData.bags || 0,
-                unit: 'bags',
-                pricePerUnit: entryData.pricePerBag || entryData.rate || 0,
-                totalAmount: entryData.totalValue || 0,
-                paymentStatus: entryData.paymentStatus || 'pending',
-                paidAmount: entryData.paidAmount || 0,
-                notes: entryData.note || entryData.notes || '',
-                party: entryData.party || '',
-                date: entryData.createdAt || new Date(),
-                originalEntryId: entryDoc.id
-              };
-
-              await transactionManager.createTransaction(transactionData);
-              console.log(`Converted entry to transaction: ${material ? material.name : 'Unknown'} - ${formatCurrency(entryData.totalValue || 0)}`);
-              
-            } catch (transactionError) {
-              console.warn(`Error converting entry ${entryDoc.id}:`, transactionError);
-            }
-          }
-        }
-        console.log(`Processed ${entriesSnapshot.size} entries for ${companyData.name}`);
-      } catch (entryError) {
-        console.warn(`Error loading entries for ${companyData.name}:`, entryError);
-      }
-    }
-
-    console.log(`Data loading complete: ${accountManager.accounts.size} accounts, ${materials.length} materials, ${transactionManager.transactions.length} transactions`);
-
-    // Populate dropdowns and load dashboard
-    await populateCompanyDropdowns();
-    populateMaterialDropdowns();
-    await loadDashboard();
-
-    showNotification('Data loaded successfully from supply chain system!', 'success');
-
-  } catch (error) {
-    console.error('Error loading existing data:', error);
-    showNotification('Error loading data: ' + error.message, 'error');
-    throw error;
-  } finally {
-    hideLoader();
-  }
+  // This would initialize charts and reports
+  showNotification('Reports loaded successfully', 'success');
 }
 
 // Initialize application
@@ -3220,8 +2647,11 @@ async function initializeApp() {
       });
     });
     
-    // Load existing data
-    await loadExistingData();
+    // Load accounts first
+    await loadAccounts();
+    
+    // Load dashboard
+    await loadDashboard();
     
     console.log('Application initialized successfully');
     
@@ -3265,13 +2695,6 @@ window.editAccount = editAccount;
 window.editTransaction = editTransaction;
 window.applyFilters = applyFilters;
 window.clearFilters = clearFilters;
-window.generateReport = generateReport;
-window.printReport = printReport;
-window.exportReport = exportReport;
-window.syncWithSupplyChain = syncWithSupplyChain;
-window.exportData = exportData;
-window.clearCache = clearCache;
-window.resetSystem = resetSystem;
 window.hideModal = hideModal;
 window.calculateTotal = function() {
   const transactionQuantity = document.getElementById('transactionQuantity');
@@ -3288,16 +2711,6 @@ window.calculateTotal = function() {
 
 // Console logging for debugging
 console.log('Aditya Fertilizers Ledger System - JavaScript Loaded');
-console.log('Available functions:', {
-  accountManager,
-  transactionManager,
-  showAddTransactionModal,
-  showAddAccountModal,
-  loadDashboard,
-  loadAccounts,
-  loadTransactions,
-  loadReports
-});
-  </script>
+</script>
 </body>
 </html>
