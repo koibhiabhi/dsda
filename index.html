@@ -1753,7 +1753,7 @@ async function viewAccountLedger(companyId) {
         showNotification('Company not found', 'error');
         return;
     }
-    
+
     const companyTransactions = transactions
         .filter(t => t.companyId === companyId)
         .sort((a, b) => {
@@ -1761,14 +1761,14 @@ async function viewAccountLedger(companyId) {
             const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
             return dateA - dateB;
         });
-    
+
     let totalSales = 0, totalPurchases = 0, outstandingReceivable = 0, outstandingPayable = 0;
-    
+
     companyTransactions.forEach(transaction => {
         const amount = transaction.totalValue || 0;
         const paid = transaction.paidAmount || 0;
         const pending = amount - paid;
-        
+
         if (transaction.type === 'sale') {
             totalSales += amount;
             outstandingReceivable += pending;
@@ -1777,7 +1777,7 @@ async function viewAccountLedger(companyId) {
             outstandingPayable += pending;
         }
     });
-    
+
     let ledgerHtml = `
         <div class="account-ledger">
             <div class="mb-4">
@@ -1791,15 +1791,15 @@ async function viewAccountLedger(companyId) {
                     <div>
                         <p><strong>Total Sales:</strong> ${formatCurrency(totalSales)}</p>
                         <p><strong>Total Purchases:</strong> ${formatCurrency(totalPurchases)}</p>
-                        <p><strong>Outstanding Receivable:</strong> ${formatCurrency(outstandingReceivable)}</p>
-                        <p><strong>Outstanding Payable:</strong> ${formatCurrency(outstandingPayable)}</p>
+                        <p><strong>Money Customers Owe:</strong> ${formatCurrency(outstandingReceivable)}</p>
+                        <p><strong>Money We Owe:</strong> ${formatCurrency(outstandingPayable)}</p>
                     </div>
                 </div>
             </div>
             <div>
                 <h4 class="font-semibold text-gray-700 mb-3">Transaction History</h4>
     `;
-    
+
     if (companyTransactions.length === 0) {
         ledgerHtml += '<p class="text-center text-gray-500 py-4">No transactions found</p>';
     } else {
@@ -1821,12 +1821,12 @@ async function viewAccountLedger(companyId) {
                     </thead>
                     <tbody>
         `;
-        
+
         companyTransactions.forEach(transaction => {
             const typeClass = transaction.type === 'sale' ? 'positive' : 'negative';
             const statusClass = transaction.paymentStatus === 'paid' ? 'badge-success' :
                                transaction.paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger';
-            
+
             ledgerHtml += `
                 <tr>
                     <td>${formatDate(transaction.createdAt)}</td>
@@ -1841,24 +1841,24 @@ async function viewAccountLedger(companyId) {
                 </tr>
             `;
         });
-        
+
         ledgerHtml += `
                     </tbody>
                 </table>
             </div>
         `;
     }
-    
+
     ledgerHtml += `
             </div>
         </div>
     `;
-    
+
     const modalHtml = `
         <div id="accountLedgerModal" class="modal-backdrop">
             <div class="modal" style="max-width: 90vw;">
                 <div class="modal-header">
-                    <h3 class="modal-title">Account Ledger - ${company.name}</h3>
+                    <h3 class="modal-title">Account Book - ${company.name}</h3>
                     <button onclick="hideModal('accountLedgerModal')" class="btn btn-secondary btn-sm">×</button>
                 </div>
                 <div class="modal-content">
@@ -1872,15 +1872,14 @@ async function viewAccountLedger(companyId) {
             </div>
         </div>
     `;
-    
+
     const existingModal = document.getElementById('accountLedgerModal');
     if (existingModal) existingModal.remove();
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
-
-  function exportPartyReport(companyId) {
+function exportPartyReport(companyId) {
     const company = companies.get(companyId);
     const companyTransactions = transactions.filter(t => t.companyId === companyId);
 
@@ -1905,7 +1904,6 @@ async function viewAccountLedger(companyId) {
     link.download = `${company.name}_transactions.csv`;
     link.click();
 }
-
 
 // Edit Functions
 async function editTransaction(companyId, transactionId) {
