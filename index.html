@@ -811,6 +811,13 @@ db.collection("transactions").onSnapshot(snapshot => {
 });
 
 
+db.collection("companies").onSnapshot(snapshot => {
+    companies = new Map(snapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
+    loadAccountsView();
+    loadDashboard();
+});
+
+
   
 // Global state
 let currentSection = 'dashboard';
