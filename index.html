@@ -1331,6 +1331,7 @@ async function loadTransactionsView() {
             })
             .slice(0, 100);
         
+        // Build transaction rows
         sortedTransactions.forEach(transaction => {
             const statusClass = transaction.paymentStatus === 'paid' ? 'badge-success' :
                                transaction.paymentStatus === 'partial' ? 'badge-warning' : 'badge-danger';
@@ -1376,25 +1377,30 @@ async function loadTransactionsView() {
                 </tr>
             `;
             tbody.innerHTML += row;
-          // Add totals row
-const totalAmount = sortedTransactions.reduce((sum, t) => sum + (t.totalValue || 0), 0);
-const totalPaid = sortedTransactions.reduce((sum, t) => sum + (t.paidAmount || 0), 0);
-const totalPending = totalAmount - totalPaid;
-
-tbody.innerHTML += `
-    <tr class="font-medium bg-gray-100">
-        <td colspan="5" class="text-right">TOTAL</td>
-        <td class="text-right">${formatCurrency(totalAmount)}</td>
-        <td>
-            Paid: ${formatCurrency(totalPaid)}<br>
-            Pending: ${formatCurrency(totalPending)}
-        </td>
-        <td></td>
-    </tr>
-`;
-
         });
-        
+
+        // ✅ Add totals row only once, after the loop
+        const totalAmount = sortedTransactions.reduce((sum, t) => sum + (t.totalValue || 0), 0);
+        const totalPaid = sortedTransactions.reduce((sum, t) => sum + (t.paidAmount || 0), 0);
+        const totalPending = totalAmount - totalPaid;
+
+        tbody.innerHTML += `
+            <tr class="font-medium bg-gray-100">
+                <td colspan="5" class="text-right">TOTAL</td>
+                <td class="text-right">${formatCurrency(totalAmount)}</td>
+                <td>
+                    Paid: ${formatCurrency(totalPaid)}<br>
+                    Pending: ${formatCurrency(totalPending)}
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="8" class="text-right">
+                    <button class="btn btn-primary" onclick="exportFilteredTransactions()">Export These Transactions</button>
+                </td>
+            </tr>
+        `;
+
     } catch (error) {
         console.error('Error loading transactions view:', error);
         showNotification('Error loading transactions: ' + error.message, 'error');
@@ -1403,6 +1409,31 @@ tbody.innerHTML += `
     }
 }
 
+// ✅ Place helper right after loadTransactionsView
+function exportFilteredTransactions() {
+    const rows = document.querySelectorAll('#transactionsTableBody tr');
+    if (rows.length === 0) {
+        showNotification('No transactions to export', 'info');
+        return;
+    }
+
+    let csvContent = "Date,Company,Type,Material,Quantity,Amount,Paid,Status\n";
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 7) { // skip totals/export rows
+            csvContent += Array.from(cells).map(cell => cell.innerText.replace(/,/g, '')).join(",") + "\n";
+        }
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `filtered_transactions_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+}
+
+  
 // Modal Functions
 async function showAddTransactionModal() {
     await populateCompanyDropdowns();
