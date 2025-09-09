@@ -1420,14 +1420,17 @@ function exportFilteredTransactions() {
     }
 
     // CSV header
-    let csvContent = "Date,Company,Type,Material,Quantity,Amount,Paid,Status\n";
+    let csvContent = "Date,Company (Our Firm),Party,Type,Material,Quantity,Amount,Paid,Status\n";
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 7 && !row.classList.contains('bg-gray-100')) { 
             // Extract clean values
             const date = cells[0].innerText.split("\n")[0].trim();
-            const company = cells[1].innerText.split("\n")[0].trim();
+
+            const company = cells[1].innerText.split("\n")[0].trim(); // our own firm
+            const party = cells[1].innerText.split("\n")[1]?.trim() || ''; // the second line (party)
+
             const type = cells[2].innerText.trim();
             const material = cells[3].innerText.trim();
             const quantity = cells[4].innerText.split("\n")[0].trim();
@@ -1439,6 +1442,7 @@ function exportFilteredTransactions() {
             csvContent += [
                 `"${date}"`,
                 `"${company}"`,
+                `"${party}"`,
                 `"${type}"`,
                 `"${material}"`,
                 `"${quantity}"`,
@@ -1456,6 +1460,7 @@ function exportFilteredTransactions() {
     link.download = `filtered_transactions_${new Date().toISOString().slice(0,10)}.csv`;
     link.click();
 }
+
 
   
 // Modal Functions
