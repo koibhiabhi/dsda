@@ -797,28 +797,6 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-
-  
-
-  // ✅ Real-time listener for transactions
-db.collection("transactions").onSnapshot(snapshot => {
-    transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Refresh all major sections automatically
-    loadDashboard();
-    loadTransactionsView();
-    loadAccountsView();
-});
-
-
-db.collection("companies").onSnapshot(snapshot => {
-    companies = new Map(snapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
-    loadAccountsView();
-    loadDashboard();
-});
-
-
-  
 // Global state
 let currentSection = 'dashboard';
 let companies = new Map();
@@ -826,6 +804,30 @@ let parties = new Map();
 let materials = new Map();
 let transactions = [];
 let isLoading = false;
+
+// ✅ Login and then start listeners
+auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PWD)
+  .then(() => {
+      console.log("Admin logged in");
+
+      // Transactions listener
+      db.collection("transactions").onSnapshot(snapshot => {
+          transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          loadDashboard();
+          loadTransactionsView();
+      });
+
+      // Companies listener
+      db.collection("companies").onSnapshot(snapshot => {
+          companies = new Map(snapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
+          loadAccountsView();
+          loadDashboard();
+      });
+  })
+  .catch(error => {
+      console.error("Login failed:", error);
+  });
+
 
 // Utility Functions
 function formatCurrency(amount) {
