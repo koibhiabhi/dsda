@@ -1411,22 +1411,46 @@ async function loadTransactionsView() {
 
 // ✅ Place helper right after loadTransactionsView
 function exportFilteredTransactions() {
-    const rows = document.querySelectorAll('#transactionsTableBody tr');
+    const tbody = document.getElementById('transactionsTableBody');
+    const rows = tbody.querySelectorAll('tr');
+
     if (rows.length === 0) {
         showNotification('No transactions to export', 'info');
         return;
     }
 
+    // CSV header
     let csvContent = "Date,Company,Type,Material,Quantity,Amount,Paid,Status\n";
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
-        if (cells.length >= 7) { // skip totals/export rows
-            csvContent += Array.from(cells).map(cell => cell.innerText.replace(/,/g, '')).join(",") + "\n";
+        if (cells.length >= 7 && !row.classList.contains('bg-gray-100')) { 
+            // Extract clean values
+            const date = cells[0].innerText.split("\n")[0].trim();
+            const company = cells[1].innerText.split("\n")[0].trim();
+            const type = cells[2].innerText.trim();
+            const material = cells[3].innerText.trim();
+            const quantity = cells[4].innerText.split("\n")[0].trim();
+            const amount = cells[5].querySelector('.font-medium')?.innerText.trim() || '';
+            const paid = cells[5].querySelector('.text-xs')?.innerText.replace("Paid:","").trim() || '';
+            const status = cells[6].innerText.split("\n")[0].trim();
+
+            // Build CSV row
+            csvContent += [
+                `"${date}"`,
+                `"${company}"`,
+                `"${type}"`,
+                `"${material}"`,
+                `"${quantity}"`,
+                `"${amount}"`,
+                `"${paid}"`,
+                `"${status}"`
+            ].join(",") + "\n";
         }
     });
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    // Export as UTF-8 with BOM so Excel shows ₹ correctly
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `filtered_transactions_${new Date().toISOString().slice(0,10)}.csv`;
