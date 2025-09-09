@@ -797,6 +797,21 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+
+  
+
+  // ✅ Real-time listener for transactions
+db.collection("transactions").onSnapshot(snapshot => {
+    transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Refresh all major sections automatically
+    loadDashboard();
+    loadTransactionsView();
+    loadAccountsView();
+});
+
+
+  
 // Global state
 let currentSection = 'dashboard';
 let companies = new Map();
@@ -2965,57 +2980,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Aditya Fertilizers Ledger System - Rewritten JavaScript Loaded');
-
-
-function refreshActiveTab() {
-    const activeTab = document.querySelector('.nav-link.active')?.id;
-
-    if (activeTab === 'dashboardTab') {
-        loadDashboard();
-    } else if (activeTab === 'transactionsTab') {
-        loadTransactionsView();
-    } else if (activeTab === 'accountsTab') {
-        loadAccountsView();
-    } else if (activeTab === 'reportsTab') {
-        loadReportsView();
-    }
-}
-
-async function saveTransaction(data) {
-    try {
-        await db.collection("transactions").doc().set(data);
-        showNotification("Transaction saved", "success");
-        refreshActiveTab(); // 👈 add this
-    } catch (error) {
-        showNotification("Error saving transaction: " + error.message, "error");
-    }
-}
-
-async function deleteTransaction(companyId, transactionId) {
-    try {
-        await db.collection("transactions").doc(transactionId).delete();
-        showNotification("Transaction deleted", "success");
-        refreshActiveTab(); // 👈 add this
-    } catch (error) {
-        showNotification("Error deleting transaction: " + error.message, "error");
-    }
-}
-
-async function updatePayment(companyId, transactionId) {
-    // your existing code…
-    refreshActiveTab(); // 👈 add this at the end
-}
-
-function switchTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-    document.getElementById(tab).style.display = 'block';
-
-    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-    document.getElementById(tab + 'Tab').classList.add('active');
-
-    refreshActiveTab(); // 👈 ensures data is fresh every time you switch
-}
-
 
 </script>
 </body>
