@@ -811,21 +811,28 @@ auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PWD)
       console.log("Admin logged in");
 
       // Transactions listener
-      db.collection("transactions").onSnapshot(snapshot => {
-          transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          if (transactions.length > 0) {
+    db.collection("transactions").onSnapshot(snapshot => {
+        transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+          if (transactions.length > 0 && companies.size > 0) {
               loadDashboard();
               loadTransactionsView();
           }
-      });
+    });
+
+
 
 
       // Companies listener
       db.collection("companies").onSnapshot(snapshot => {
           companies = new Map(snapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
-          loadAccountsView();
-          loadDashboard();
+
+          if (companies.size > 0 && transactions.length > 0) {
+              loadAccountsView();
+              loadDashboard();
+          }
       });
+
   })
   .catch(error => {
       console.error("Login failed:", error);
