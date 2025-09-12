@@ -1083,66 +1083,75 @@ function passwordProtectedAction(actionFn) {
 // Dashboard Functions
 async function loadDashboard() {
     if (isLoading) return;
-    
+
     showLoader();
     try {
         // Calculate dashboard metrics
         let totalSales = 0, totalPurchases = 0;
         let totalReceivables = 0, totalPayables = 0;
         let monthSales = 0;
-        
+
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
-        
+
         transactions.forEach(transaction => {
             const amount = transaction.totalValue || 0;
             const paid = transaction.paidAmount || 0;
             const pending = amount - paid;
-            
-            if (transaction.type === 'sale') {
+
+            // ✅ safer date handling
+            let transDate;
+            if (transaction.createdAt?.toDate) {
+                transDate = transaction.createdAt.toDate();
+            } else if (transaction.createdAt?.seconds) {
+                transDate = new Date(transaction.createdAt.seconds * 1000);
+            } else if (transaction.createdAt) {
+                transDate = new Date(transaction.createdAt);
+            } else {
+                transDate = null;
+            }
+
+            if (transaction.type === "sale") {
                 totalSales += amount;
                 totalReceivables += pending;
-                
-                // Check if transaction is from this month
-                const transDate = transaction.createdAt?.toDate ? transaction.createdAt.toDate() : new Date(transaction.createdAt);
-                if (transDate >= startOfMonth) {
+
+                if (transDate && transDate >= startOfMonth) {
                     monthSales += amount;
                 }
-            } else if (transaction.type === 'purchase') {
+            } else if (transaction.type === "purchase") {
                 totalPurchases += amount;
                 totalPayables += pending;
             }
         });
-        
+
         const netPosition = totalReceivables - totalPayables;
-        
-        // Update dashboard cards
-        document.getElementById('totalReceivables').textContent = formatCurrency(totalReceivables);
-        document.getElementById('totalPayables').textContent = formatCurrency(totalPayables);
-        document.getElementById('netPosition').textContent = formatCurrency(Math.abs(netPosition));
-        document.getElementById('monthSales').textContent = formatCurrency(monthSales);
-        
-        // Update net position styling
-        const netPositionChange = document.getElementById('netPositionChange');
+
+        // ✅ Update dashboard cards (without Math.abs)
+        document.getElementById("totalReceivables").textContent = formatCurrency(totalReceivables);
+        document.getElementById("totalPayables").textContent = formatCurrency(totalPayables);
+        document.getElementById("netPosition").textContent = formatCurrency(netPosition);
+        document.getElementById("monthSales").textContent = formatCurrency(monthSales);
+
+        // ✅ Update net position styling
+        const netPositionChange = document.getElementById("netPositionChange");
         if (netPosition > 0) {
-            netPositionChange.className = 'stat-change positive';
-            netPositionChange.innerHTML = '<span>🟢 Money to be received</span>';
+            netPositionChange.className = "stat-change positive";
+            netPositionChange.innerHTML = "<span>🟢 Money to be received</span>";
         } else if (netPosition < 0) {
-            netPositionChange.className = 'stat-change negative';
-            netPositionChange.innerHTML = '<span>🔴 Money to be paid</span>';
+            netPositionChange.className = "stat-change negative";
+            netPositionChange.innerHTML = "<span>🔴 Money to be paid</span>";
         } else {
-            netPositionChange.className = 'stat-change';
-            netPositionChange.innerHTML = '<span>⚪ Balanced position</span>';
+            netPositionChange.className = "stat-change";
+            netPositionChange.innerHTML = "<span>⚪ Balanced position</span>";
         }
-        
-        // Load recent transactions and outstanding payments
+
+        // ✅ Load details
         await loadRecentTransactions();
         await loadOutstandingPayments();
-        
     } catch (error) {
-        console.error('Error loading dashboard:', error);
-        showNotification('Error loading dashboard: ' + error.message, 'error');
+        console.error("Error loading dashboard:", error);
+        showNotification("Error loading dashboard: " + error.message, "error");
     } finally {
         hideLoader();
     }
