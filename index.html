@@ -2352,6 +2352,14 @@ function initializeFormHandlers() {
 
 // Reports Functions
 function loadReports() {
+    // Wait for data to be loaded before initializing charts
+    if (!dashboardDataLoaded || transactions.length === 0) {
+        console.log('Reports loading delayed - waiting for data...');
+        // Try again after a short delay
+        setTimeout(loadReports, 1000);
+        return;
+    }
+    
     // Initialize charts if Chart.js is available
     if (typeof Chart !== 'undefined') {
         initializeCharts();
@@ -2359,7 +2367,11 @@ function loadReports() {
         // Load Chart.js if not available
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        script.onload = initializeCharts;
+        script.onload = () => {
+            if (dashboardDataLoaded && transactions.length > 0) {
+                initializeCharts();
+            }
+        };
         document.head.appendChild(script);
     }
 }
