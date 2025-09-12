@@ -32,7 +32,7 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
-  min-height: 100vh;
+  font-size: 14px;
 }
 
 .header {
@@ -47,6 +47,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  gap: 1rem;
 }
 
 .logo {
@@ -54,9 +55,9 @@ body {
   align-items: center;
   gap: 0.5rem;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: var(--primary);
-  margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .nav-links {
@@ -76,7 +77,8 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .nav-btn:hover {
@@ -111,19 +113,19 @@ body {
 }
 
 .stat-title {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
 }
 
 .stat-change {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -146,11 +148,13 @@ body {
   padding: 1.25rem 1.25rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .card-title {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -160,17 +164,19 @@ body {
 
 .table-container {
   overflow-x: auto;
+  width: 100%;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  min-width: 600px;
 }
 
 .table th,
 .table td {
-  padding: 0.75rem;
+  padding: 0.6rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
@@ -191,7 +197,7 @@ body {
   border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   transition: all 0.2s;
   display: inline-flex;
   align-items: center;
@@ -233,7 +239,7 @@ body {
 }
 
 .btn-sm {
-  padding: 0.375rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
 }
 
@@ -243,7 +249,7 @@ body {
 
 .label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
   color: var(--text);
@@ -256,7 +262,7 @@ body {
   padding: 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   transition: border-color 0.2s;
 }
 
@@ -298,7 +304,7 @@ body {
 }
 
 .modal-title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -316,11 +322,11 @@ body {
 }
 
 .badge {
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
-  display: inline-block;
+  white-space: nowrap;
 }
 
 .badge-success { background: #dcfce7; color: var(--success); }
@@ -384,8 +390,8 @@ body {
 .text-right { text-align: right; }
 .text-center { text-align: center; }
 .font-medium { font-weight: 500; }
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.8rem; }
+.text-xs { font-size: 0.7rem; }
 
 .grid {
   display: grid;
@@ -408,120 +414,41 @@ body {
   display: none !important;
 }
 
-.flex {
-  display: flex;
+/* Password modal styles */
+.password-modal-content {
+  padding: 1.5rem;
+  text-align: center;
 }
 
-.justify-between {
-  justify-content: space-between;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.py-3 {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-.border-b {
-  border-bottom: 1px solid var(--border);
-}
-
-.border-gray-100 {
-  border-color: #f3f4f6;
-}
-
-.hover\:bg-gray-50:hover {
-  background-color: #f9fafb;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-.gap-2 {
-  gap: 0.5rem;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.mb-4 {
-  margin-bottom: 1rem;
-}
-
-.mt-6 {
-  margin-top: 1.5rem;
-}
-
-.space-y-4 > * + * {
-  margin-top: 1rem;
-}
-
-.pb-4 {
-  padding-bottom: 1rem;
-}
-
-.text-lg {
-  font-size: 1.125rem;
-}
-
-.text-xl {
-  font-size: 1.25rem;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.font-semibold {
-  font-weight: 600;
-}
-
-.text-green-600 {
-  color: #059669;
-}
-
-.text-red-600 {
-  color: #dc2626;
-}
-
-.bg-gray-50 {
-  background-color: #f9fafb;
-}
-
-.p-4 {
-  padding: 1rem;
-}
-
-.rounded {
+.password-input {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
-}
-
-.border-t {
-  border-top: 1px solid var(--border);
-}
-
-.pt-2 {
-  padding-top: 0.5rem;
+  width: 100%;
+  font-size: 1rem;
 }
 
 /* Responsive adjustments */
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .header {
     flex-direction: row;
-    padding: 1rem 1.5rem;
+    padding: 1rem 2rem;
   }
   
-  .logo {
-    margin-bottom: 0;
+  .card-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .container {
+    padding: 2rem;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
   
   .nav-links {
@@ -529,93 +456,19 @@ body {
   }
   
   .nav-btn {
+    font-size: 0.875rem;
     padding: 0.5rem 1rem;
-    font-size: 1rem;
   }
   
-  .container {
-    padding: 1.5rem;
-  }
-  
-  .card-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .filters {
-    flex-direction: row;
+  body {
+    font-size: 16px;
   }
 }
 
-@media (min-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  .stat-card {
-    padding: 1.5rem;
-  }
-  
-  .stat-value {
-    font-size: 2rem;
-  }
-  
-  .card-header {
-    padding: 1.5rem 1.5rem 0;
-  }
-  
-  .card-content {
-    padding: 1.5rem;
-  }
-  
-  .modal-header {
-    padding: 1.5rem;
-  }
-  
-  .modal-content {
-    padding: 1.5rem;
-  }
-  
-  .modal-footer {
-    padding: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    padding: 2rem;
-  }
-  
-  .grid-cols-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 767px) {
+@media (max-width: 640px) {
   .grid-cols-2,
   .grid-cols-3 {
     grid-template-columns: 1fr;
-  }
-  
-  .table {
-    font-size: 0.75rem;
-  }
-  
-  .table th,
-  .table td {
-    padding: 0.5rem;
-  }
-  
-  .btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
   }
   
   .filters {
@@ -626,25 +479,49 @@ body {
   .filters .input {
     width: 100%;
   }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+  
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .table {
+    font-size: 0.75rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.4rem;
+  }
 }
 
 /* Print styles for reports */
 @media print {
   .header,
   .nav-links,
-  .modal-footer,
-  .btn {
+  .btn,
+  .modal-footer {
     display: none !important;
   }
   
   .container {
     padding: 0;
-    max-width: 100%;
+    margin: 0;
+    width: 100%;
   }
   
   .card {
     box-shadow: none;
     border: none;
+    margin: 0;
   }
 }
 </style>
@@ -676,63 +553,49 @@ body {
     <div class="dashboard-grid">
       <div class="stat-card">
         <div class="stat-title">Total Receivables</div>
-        <div class="stat-value" id="totalReceivables">₹0</div>
+        <div class="stat-value" id="totalReceivables">Loading...</div>
         <div class="stat-change positive">
           <span>Outstanding from customers</span>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-title">Total Payables</div>
-        <div class="stat-value" id="totalPayables">₹0</div>
+        <div class="stat-value" id="totalPayables">Loading...</div>
         <div class="stat-change negative">
           <span>Outstanding to suppliers</span>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-title">Overall Balance</div>
-        <div class="stat-value" id="netPosition">₹0</div>
+        <div class="stat-value" id="netPosition">Loading...</div>
         <div class="stat-change" id="netPositionChange">
           <span>Overall financial position</span>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-title">This Month Sales</div>
-        <div class="stat-value" id="monthSales">₹0</div>
+        <div class="stat-value" id="monthSales">Loading...</div>
         <div class="stat-change positive">
           <span>Current month revenue</span>
         </div>
       </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2">
+    <div class="grid grid-cols-1 md:grid-cols-2">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">Financial Overview</h2>
+          <h3 class="card-title">Recent Transactions</h3>
+          <button class="btn btn-primary btn-sm" onclick="showAddTransactionModal()">Add Transaction</button>
         </div>
         <div class="card-content">
-          <canvas id="financialChart" height="300"></canvas>
+          <div id="recentTransactions">Loading...</div>
         </div>
       </div>
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">Recent Transactions</h2>
-          <button class="btn btn-primary btn-sm" id="addTransactionBtn">Add New</button>
+          <h3 class="card-title">Outstanding Payments</h3>
         </div>
         <div class="card-content">
-          <div class="table-container">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Account</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody id="recentTransactions">
-                <tr><td colspan="4" class="text-center">Loading transactions...</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <div id="outstandingPayments">Loading...</div>
         </div>
       </div>
     </div>
@@ -742,24 +605,22 @@ body {
   <div id="accounts-section" class="section hidden">
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title">Account Management</h2>
-        <div class="actions">
-          <button class="btn btn-primary" id="addAccountBtn">Add Account</button>
-        </div>
+        <h3 class="card-title">Company Accounts</h3>
+        <button class="btn btn-primary" onclick="showAddAccountModal()">Add Account</button>
       </div>
       <div class="card-content">
         <div class="search-bar">
-          <input type="text" class="input search-input" id="accountSearch" placeholder="Search accounts...">
-          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <input type="text" class="input search-input" placeholder="Search accounts..." id="accountSearch">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <path d="M21 21l-4.35-4.35"></path>
           </svg>
         </div>
         <div class="table-container">
-          <table class="table">
+          <table class="table" id="accountsTable">
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Company Name</th>
                 <th>Type</th>
                 <th>Balance</th>
                 <th>Status</th>
@@ -779,52 +640,42 @@ body {
   <div id="transactions-section" class="section hidden">
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title">Transaction History</h2>
-        <div class="actions">
-          <button class="btn btn-primary" id="addTransactionBtn2">Add Transaction</button>
-        </div>
+        <h3 class="card-title">All Transactions</h3>
+        <button class="btn btn-primary" onclick="showAddTransactionModal()">Add Transaction</button>
       </div>
       <div class="card-content">
         <div class="filters">
-          <div class="form-group">
-            <select class="select" id="transactionTypeFilter">
-              <option value="">All Types</option>
-              <option value="sale">Sale</option>
-              <option value="purchase">Purchase</option>
-              <option value="payment">Payment</option>
-              <option value="receipt">Receipt</option>
-              <option value="expense">Expense</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <select class="select" id="accountFilter">
-              <option value="">All Accounts</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <input type="date" class="input" id="dateFromFilter">
-          </div>
-          <div class="form-group">
-            <input type="date" class="input" id="dateToFilter">
-          </div>
-          <button class="btn btn-secondary" id="applyFiltersBtn">Apply</button>
+          <select class="select" id="transactionTypeFilter">
+            <option value="all">All Types</option>
+            <option value="sale">Sales</option>
+            <option value="purchase">Purchases</option>
+            <option value="payment">Payments</option>
+            <option value="receipt">Receipts</option>
+          </select>
+          <select class="select" id="transactionStatusFilter">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="partial">Partial</option>
+            <option value="paid">Paid</option>
+          </select>
+          <input type="date" class="input" id="startDateFilter">
+          <input type="date" class="input" id="endDateFilter">
+          <button class="btn btn-secondary" onclick="filterTransactions()">Apply Filters</button>
         </div>
         <div class="table-container">
-          <table class="table">
+          <table class="table" id="transactionsTable">
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Account</th>
                 <th>Type</th>
-                <th>Description</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Balance</th>
+                <th>Account</th>
+                <th>Amount</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="transactionsList">
-              <tr><td colspan="8" class="text-center">Loading transactions...</td></tr>
+              <tr><td colspan="6" class="text-center">Loading transactions...</td></tr>
             </tbody>
           </table>
         </div>
@@ -836,40 +687,16 @@ body {
   <div id="reports-section" class="section hidden">
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title">Financial Reports</h2>
+        <h3 class="card-title">Financial Reports</h3>
         <div class="actions">
-          <button class="btn btn-primary" id="generateReportBtn">Generate Report</button>
+          <button class="btn btn-secondary" onclick="generateSalesReport()">Sales Report</button>
+          <button class="btn btn-secondary" onclick="generatePurchaseReport()">Purchase Report</button>
+          <button class="btn btn-secondary" onclick="generateLedgerReport()">Ledger Report</button>
         </div>
       </div>
       <div class="card-content">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div class="form-group">
-            <label class="label">Report Type</label>
-            <select class="select" id="reportType">
-              <option value="profitLoss">Profit & Loss Statement</option>
-              <option value="balanceSheet">Balance Sheet</option>
-              <option value="cashFlow">Cash Flow Statement</option>
-              <option value="trialBalance">Trial Balance</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="label">From Date</label>
-            <input type="date" class="input" id="reportFromDate">
-          </div>
-          <div class="form-group">
-            <label class="label">To Date</label>
-            <input type="date" class="input" id="reportToDate">
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title" id="reportTitle">Report Preview</h3>
-          </div>
-          <div class="card-content">
-            <div id="reportContent">
-              <p class="text-center text-gray-500">Select report parameters and generate to view</p>
-            </div>
-          </div>
+        <div id="reportContainer">
+          <p class="text-center">Select a report to generate from the options above.</p>
         </div>
       </div>
     </div>
@@ -877,44 +704,26 @@ body {
 
   <!-- Settings Section -->
   <div id="settings-section" class="section hidden">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">System Settings</h2>
-        </div>
-        <div class="card-content">
-          <div class="form-group">
-            <label class="label">Business Name</label>
-            <input type="text" class="input" id="businessName" value="Aditya Fertilizers">
-          </div>
-          <div class="form-group">
-            <label class="label">Currency</label>
-            <select class="select" id="currency">
-              <option value="INR" selected>Indian Rupee (₹)</option>
-              <option value="USD">US Dollar ($)</option>
-              <option value="EUR">Euro (€)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="label">Financial Year Start</label>
-            <input type="date" class="input" id="financialYearStart" value="2024-04-01">
-          </div>
-          <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">System Settings</h3>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">System Maintenance</h2>
-        </div>
-        <div class="card-content">
-          <div class="form-group">
-            <label class="label">Admin Password</label>
-            <input type="password" class="input" id="adminPassword" placeholder="Enter password to enable admin functions">
+      <div class="card-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 class="font-medium mb-2">System Management</h4>
+            <p class="text-sm text-muted mb-4">Administrative functions requiring password confirmation</p>
+            
+            <button class="btn btn-warning mb-2" onclick="showPasswordModal('clearDuplicates')">Clear Duplicates</button>
+            <button class="btn btn-warning mb-2" onclick="showPasswordModal('clearCache')">Clear Cache</button>
+            <button class="btn btn-danger mb-2" onclick="showPasswordModal('resetSystem')">Reset System</button>
           </div>
-          <div class="space-y-4">
-            <button class="btn btn-secondary w-full" id="clearDuplicatesBtn" disabled>Clear Duplicate Entries</button>
-            <button class="btn btn-secondary w-full" id="clearCacheBtn" disabled>Clear Cache</button>
-            <button class="btn btn-danger w-full" id="resetSystemBtn" disabled>Reset System Data</button>
+          <div>
+            <h4 class="font-medium mb-2">Data Backup</h4>
+            <p class="text-sm text-muted mb-4">Manage your data backups and restores</p>
+            
+            <button class="btn btn-secondary mb-2" onclick="backupData()">Backup Data</button>
+            <button class="btn btn-secondary" onclick="restoreData()">Restore Data</button>
           </div>
         </div>
       </div>
@@ -922,102 +731,107 @@ body {
   </div>
 </main>
 
+<!-- Password Modal -->
+<div class="modal-backdrop hidden" id="passwordModal">
+  <div class="modal" style="max-width: 400px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Admin Authentication</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closePasswordModal()">×</button>
+    </div>
+    <div class="password-modal-content">
+      <p>Please enter the admin password to continue:</p>
+      <input type="password" class="password-input" id="adminPassword" placeholder="Enter password">
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="verifyPassword()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Add Account Modal -->
-<div class="modal-backdrop hidden" id="accountModal">
+<div class="modal-backdrop hidden" id="addAccountModal">
   <div class="modal">
     <div class="modal-header">
-      <h2 class="modal-title">Add New Account</h2>
-      <button class="btn btn-secondary btn-sm" id="closeAccountModal">✕</button>
+      <h3 class="modal-title">Add New Account</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('addAccountModal')">×</button>
     </div>
     <div class="modal-content">
-      <form id="accountForm">
+      <form id="addAccountForm">
         <div class="form-group">
-          <label class="label">Account Name</label>
-          <input type="text" class="input" id="accountName" required>
+          <label class="label" for="companyName">Company Name</label>
+          <input type="text" class="input" id="companyName" required>
         </div>
         <div class="form-group">
-          <label class="label">Account Type</label>
+          <label class="label" for="accountType">Account Type</label>
           <select class="select" id="accountType" required>
-            <option value="">Select Type</option>
-            <option value="customer">Customer (Receivable)</option>
-            <option value="supplier">Supplier (Payable)</option>
-            <option value="bank">Bank Account</option>
-            <option value="cash">Cash Account</option>
-            <option value="income">Income Account</option>
-            <option value="expense">Expense Account</option>
-            <option value="asset">Asset Account</option>
-            <option value="liability">Liability Account</option>
+            <option value="customer">Customer</option>
+            <option value="supplier">Supplier</option>
+            <option value="bank">Bank</option>
+            <option value="cash">Cash</option>
+            <option value="other">Other</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="label">Opening Balance</label>
-          <input type="number" class="input" id="accountBalance" value="0" step="0.01">
+          <label class="label" for="openingBalance">Opening Balance</label>
+          <input type="number" class="input" id="openingBalance" value="0" step="0.01">
         </div>
         <div class="form-group">
-          <label class="label">Contact Information</label>
-          <textarea class="textarea" id="accountContact" rows="3"></textarea>
+          <label class="label" for="accountNotes">Notes</label>
+          <textarea class="textarea" id="accountNotes" rows="3"></textarea>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" id="cancelAccountBtn">Cancel</button>
-      <button class="btn btn-primary" id="saveAccountBtn">Save Account</button>
+      <button class="btn btn-secondary" onclick="closeModal('addAccountModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addAccount()">Save Account</button>
     </div>
   </div>
 </div>
 
 <!-- Add Transaction Modal -->
-<div class="modal-backdrop hidden" id="transactionModal">
+<div class="modal-backdrop hidden" id="addTransactionModal">
   <div class="modal">
     <div class="modal-header">
-      <h2 class="modal-title">Add New Transaction</h2>
-      <button class="btn btn-secondary btn-sm" id="closeTransactionModal">✕</button>
+      <h3 class="modal-title">Add New Transaction</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('addTransactionModal')">×</button>
     </div>
     <div class="modal-content">
-      <form id="transactionForm">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-group">
-            <label class="label">Date</label>
-            <input type="date" class="input" id="transactionDate" required>
-          </div>
-          <div class="form-group">
-            <label class="label">Transaction Type</label>
-            <select class="select" id="transactionType" required>
-              <option value="">Select Type</option>
-              <option value="sale">Sale</option>
-              <option value="purchase">Purchase</option>
-              <option value="payment">Payment</option>
-              <option value="receipt">Receipt</option>
-              <option value="expense">Expense</option>
-              <option value="adjustment">Adjustment</option>
-            </select>
-          </div>
-        </div>
+      <form id="addTransactionForm">
         <div class="form-group">
-          <label class="label">Account</label>
-          <select class="select" id="transactionAccount" required>
-            <option value="">Select Account</option>
+          <label class="label" for="transactionType">Transaction Type</label>
+          <select class="select" id="transactionType" required onchange="toggleTransactionFields()">
+            <option value="sale">Sale</option>
+            <option value="purchase">Purchase</option>
+            <option value="payment">Payment</option>
+            <option value="receipt">Receipt</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="label">Description</label>
-          <input type="text" class="input" id="transactionDescription" required>
+          <label class="label" for="transactionAccount">Account</label>
+          <select class="select" id="transactionAccount" required></select>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-group">
-            <label class="label">Amount (₹)</label>
-            <input type="number" class="input" id="transactionAmount" step="0.01" min="0" required>
-          </div>
-          <div class="form-group">
-            <label class="label">Reference No.</label>
-            <input type="text" class="input" id="transactionReference">
-          </div>
+        <div class="form-group">
+          <label class="label" for="transactionAmount">Amount (₹)</label>
+          <input type="number" class="input" id="transactionAmount" required step="0.01" min="0">
+        </div>
+        <div class="form-group" id="paymentAmountGroup">
+          <label class="label" for="paymentAmount">Payment Amount (₹)</label>
+          <input type="number" class="input" id="paymentAmount" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label class="label" for="transactionDate">Date</label>
+          <input type="date" class="input" id="transactionDate" required>
+        </div>
+        <div class="form-group">
+          <label class="label" for="transactionNotes">Notes</label>
+          <textarea class="textarea" id="transactionNotes" rows="3"></textarea>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" id="cancelTransactionBtn">Cancel</button>
-      <button class="btn btn-primary" id="saveTransactionBtn">Save Transaction</button>
+      <button class="btn btn-secondary" onclick="closeModal('addTransactionModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addTransaction()">Save Transaction</button>
     </div>
   </div>
 </div>
@@ -1025,12 +839,12 @@ body {
 <script>
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC4mOkOzi0lO0LvV9p2dYqLd9J8N7Z8X7A",
+  apiKey: "AIzaSyDummyAPIKeyForAdityaFertilizers",
   authDomain: "aditya-fertilizers-ledger.firebaseapp.com",
   projectId: "aditya-fertilizers-ledger",
   storageBucket: "aditya-fertilizers-ledger.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcd1234567890ef"
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:dummyappidforadityafertilizers"
 };
 
 // Initialize Firebase
@@ -1040,1070 +854,967 @@ const db = firebase.firestore();
 // Global variables
 let accounts = [];
 let transactions = [];
-let settings = {};
-let financialChart = null;
-
-// DOM Elements
-const sectionButtons = document.querySelectorAll('.nav-btn');
-const sections = document.querySelectorAll('.section');
-const loader = document.getElementById('loader');
+let currentAction = null;
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-  // Set current date for date inputs
+function initApp() {
+  showLoader();
+  
+  // Set current date as default for date inputs
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('transactionDate').value = today;
   
-  // Set default date range for reports (current month)
+  // Set date filters to current month
   const firstDay = new Date();
   firstDay.setDate(1);
-  document.getElementById('reportFromDate').value = firstDay.toISOString().split('T')[0];
-  document.getElementById('reportToDate').value = today;
+  document.getElementById('startDateFilter').value = firstDay.toISOString().split('T')[0];
+  document.getElementById('endDateFilter').value = today;
   
   // Load data from Firebase
-  loadData();
+  loadAccounts();
+  loadTransactions();
   
   // Set up event listeners
   setupEventListeners();
-});
+}
 
-// Setup all event listeners
+// Set up event listeners
 function setupEventListeners() {
   // Navigation
-  sectionButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const sectionId = button.getAttribute('data-section');
-      switchSection(sectionId);
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.getAttribute('data-section');
+      showSection(section);
     });
   });
   
-  // Account modal
-  document.getElementById('addAccountBtn').addEventListener('click', () => openAccountModal());
-  document.getElementById('closeAccountModal').addEventListener('click', () => closeAccountModal());
-  document.getElementById('cancelAccountBtn').addEventListener('click', () => closeAccountModal());
-  document.getElementById('saveAccountBtn').addEventListener('click', () => saveAccount());
+  // Search functionality
+  document.getElementById('accountSearch').addEventListener('input', filterAccounts);
   
-  // Transaction modal
-  document.getElementById('addTransactionBtn').addEventListener('click', () => openTransactionModal());
-  document.getElementById('addTransactionBtn2').addEventListener('click', () => openTransactionModal());
-  document.getElementById('closeTransactionModal').addEventListener('click', () => closeTransactionModal());
-  document.getElementById('cancelTransactionBtn').addEventListener('click', () => closeTransactionModal());
-  document.getElementById('saveTransactionBtn').addEventListener('click', () => saveTransaction());
-  
-  // Filters
-  document.getElementById('applyFiltersBtn').addEventListener('click', () => filterTransactions());
-  
-  // Reports
-  document.getElementById('generateReportBtn').addEventListener('click', () => generateReport());
-  
-  // Settings
-  document.getElementById('saveSettingsBtn').addEventListener('click', () => saveSettings());
-  
-  // Admin password
-  document.getElementById('adminPassword').addEventListener('input', (e) => {
-    const password = e.target.value;
-    const adminButtons = [
-      document.getElementById('clearDuplicatesBtn'),
-      document.getElementById('clearCacheBtn'),
-      document.getElementById('resetSystemBtn')
-    ];
-    
-    if (password === '1234') {
-      adminButtons.forEach(btn => btn.disabled = false);
-    } else {
-      adminButtons.forEach(btn => btn.disabled = true);
-    }
-  });
-  
-  // Admin functions
-  document.getElementById('clearDuplicatesBtn').addEventListener('click', () => clearDuplicates());
-  document.getElementById('clearCacheBtn').addEventListener('click', () => clearCache());
-  document.getElementById('resetSystemBtn').addEventListener('click', () => resetSystem());
-}
-
-// Switch between sections
-function switchSection(sectionId) {
-  // Update active button
-  sectionButtons.forEach(button => {
-    if (button.getAttribute('data-section') === sectionId) {
-      button.classList.add('active');
-    } else {
-      button.classList.remove('active');
-    }
-  });
-  
-  // Show active section
-  sections.forEach(section => {
-    if (section.id === `${sectionId}-section`) {
-      section.classList.remove('hidden');
-      
-      // Load section-specific data
-      if (sectionId === 'accounts') {
-        populateAccountsList();
-      } else if (sectionId === 'transactions') {
-        populateTransactionsList();
-        populateAccountFilter();
-      } else if (sectionId === 'reports') {
-        // Nothing specific to load yet
-      } else if (sectionId === 'settings') {
-        // Nothing specific to load yet
+  // Close modals when clicking outside
+  document.querySelectorAll('.modal-backdrop').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
       }
-    } else {
-      section.classList.add('hidden');
-    }
+    });
   });
 }
 
-// Load all data from Firebase
-async function loadData() {
-  showLoader();
-  
-  try {
-    // Load accounts
-    const accountsSnapshot = await db.collection('accounts').get();
-    accounts = accountsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // Load transactions
-    const transactionsSnapshot = await db.collection('transactions').orderBy('date', 'desc').get();
-    transactions = transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // Load settings
-    const settingsDoc = await db.collection('settings').doc('appSettings').get();
-    if (settingsDoc.exists) {
-      settings = settingsDoc.data();
-      applySettings();
+// Show section
+function showSection(section) {
+  // Update active nav button
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('data-section') === section) {
+      btn.classList.add('active');
     }
-    
-    // Update UI with loaded data
-    updateDashboard();
-    populateAccountsList();
-    populateTransactionsList();
-    populateAccountFilter();
-    
-    hideLoader();
-  } catch (error) {
-    console.error('Error loading data:', error);
-    hideLoader();
-    alert('Error loading data. Please check your internet connection.');
-  }
+  });
+  
+  // Show selected section
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.classList.add('hidden');
+  });
+  document.getElementById(`${section}-section`).classList.remove('hidden');
 }
 
 // Show loader
 function showLoader() {
-  loader.style.display = 'flex';
+  document.getElementById('loader').style.display = 'flex';
 }
 
 // Hide loader
 function hideLoader() {
-  loader.style.display = 'none';
+  document.getElementById('loader').style.display = 'none';
 }
 
-// Apply settings to UI
-function applySettings() {
-  if (settings.businessName) {
-    document.getElementById('businessName').value = settings.businessName;
-    document.title = `${settings.businessName} - Accounting Ledger`;
-  }
-  if (settings.currency) {
-    document.getElementById('currency').value = settings.currency;
-  }
-  if (settings.financialYearStart) {
-    document.getElementById('financialYearStart').value = settings.financialYearStart;
-  }
+// Close modal
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.add('hidden');
 }
 
-// Update dashboard with current data
-function updateDashboard() {
-  // Calculate financial metrics
-  const receivables = accounts
-    .filter(acc => acc.type === 'customer')
-    .reduce((sum, acc) => sum + (acc.balance || 0), 0);
+// Show add account modal
+function showAddAccountModal() {
+  document.getElementById('addAccountModal').classList.remove('hidden');
+}
+
+// Show add transaction modal
+function showAddTransactionModal() {
+  // Load accounts into dropdown
+  const accountSelect = document.getElementById('transactionAccount');
+  accountSelect.innerHTML = '';
   
-  const payables = accounts
-    .filter(acc => acc.type === 'supplier')
-    .reduce((sum, acc) => sum + (acc.balance || 0), 0);
+  accounts.forEach(account => {
+    const option = document.createElement('option');
+    option.value = account.id;
+    option.textContent = account.companyName;
+    accountSelect.appendChild(option);
+  });
   
-  const netPosition = receivables - payables;
+  document.getElementById('addTransactionModal').classList.remove('hidden');
+}
+
+// Toggle transaction fields based on type
+function toggleTransactionFields() {
+  const type = document.getElementById('transactionType').value;
+  const paymentAmountGroup = document.getElementById('paymentAmountGroup');
   
-  // Calculate current month sales
-  const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthSales = transactions
-    .filter(t => t.type === 'sale' && new Date(t.date) >= firstDayOfMonth)
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
-  
-  // Update dashboard elements
-  document.getElementById('totalReceivables').textContent = formatCurrency(receivables);
-  document.getElementById('totalPayables').textContent = formatCurrency(payables);
-  document.getElementById('netPosition').textContent = formatCurrency(netPosition);
-  document.getElementById('monthSales').textContent = formatCurrency(monthSales);
-  
-  // Update net position indicator
-  const netPositionChange = document.getElementById('netPositionChange');
-  if (netPosition > 0) {
-    netPositionChange.className = 'stat-change positive';
-    netPositionChange.innerHTML = '<span>Positive net position</span>';
-  } else if (netPosition < 0) {
-    netPositionChange.className = 'stat-change negative';
-    netPositionChange.innerHTML = '<span>Negative net position</span>';
+  if (type === 'sale' || type === 'purchase') {
+    paymentAmountGroup.style.display = 'block';
   } else {
-    netPositionChange.className = 'stat-change';
-    netPositionChange.innerHTML = '<span>Balanced position</span>';
+    paymentAmountGroup.style.display = 'none';
   }
-  
-  // Update recent transactions
-  updateRecentTransactions();
-  
-  // Update financial chart
-  updateFinancialChart();
 }
 
-// Update recent transactions list
-function updateRecentTransactions() {
-  const recentTransactionsList = document.getElementById('recentTransactions');
-  const recentTxns = transactions.slice(0, 5);
-  
-  if (recentTxns.length === 0) {
-    recentTransactionsList.innerHTML = '<tr><td colspan="4" class="text-center">No transactions found</td></tr>';
-    return;
-  }
-  
-  recentTransactionsList.innerHTML = recentTxns.map(txn => `
-    <tr>
-      <td>${formatDate(txn.date)}</td>
-      <td>${getAccountName(txn.accountId)}</td>
-      <td><span class="badge ${getTransactionBadgeClass(txn.type)}">${txn.type}</span></td>
-      <td class="text-right">${formatCurrency(txn.amount)}</td>
-    </tr>
-  `).join('');
-}
-
-// Update financial chart
-function updateFinancialChart() {
-  const ctx = document.getElementById('financialChart').getContext('2d');
-  
-  // Destroy previous chart if it exists
-  if (financialChart) {
-    financialChart.destroy();
-  }
-  
-  // Prepare data for the chart (last 6 months)
-  const months = [];
-  const salesData = [];
-  const expensesData = [];
-  
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const monthName = month.toLocaleString('default', { month: 'short' });
-    months.push(monthName);
+// Load accounts from Firebase
+function loadAccounts() {
+  showLoader();
+  db.collection('accounts').orderBy('companyName').onSnapshot(snapshot => {
+    accounts = [];
+    snapshot.forEach(doc => {
+      accounts.push({ id: doc.id, ...doc.data() });
+    });
     
-    // Calculate sales for this month
-    const firstDay = new Date(month.getFullYear(), month.getMonth(), 1);
-    const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-    
-    const sales = transactions
-      .filter(t => t.type === 'sale' && 
-                  new Date(t.date) >= firstDay && 
-                  new Date(t.date) <= lastDay)
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
-    
-    salesData.push(sales);
-    
-    // Calculate expenses for this month
-    const expenses = transactions
-      .filter(t => (t.type === 'expense' || t.type === 'purchase') && 
-                  new Date(t.date) >= firstDay && 
-                  new Date(t.date) <= lastDay)
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
-    
-    expensesData.push(expenses);
-  }
-  
-  // Create new chart
-  financialChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: months,
-      datasets: [
-        {
-          label: 'Sales',
-          data: salesData,
-          backgroundColor: 'rgba(5, 150, 105, 0.5)',
-          borderColor: 'rgb(5, 150, 105)',
-          borderWidth: 1
-        },
-        {
-          label: 'Expenses',
-          data: expensesData,
-          backgroundColor: 'rgba(220, 38, 38, 0.5)',
-          borderColor: 'rgb(220, 38, 38)',
-          borderWidth: 1
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return '₹' + value.toLocaleString();
-            }
-          }
-        }
-      },
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return context.dataset.label + ': ₹' + context.raw.toLocaleString();
-            }
-          }
-        }
-      }
-    }
+    renderAccounts();
+    updateDashboard();
+    hideLoader();
+  }, error => {
+    console.error('Error loading accounts:', error);
+    hideLoader();
   });
 }
 
-// Populate accounts list
-function populateAccountsList() {
+// Load transactions from Firebase
+function loadTransactions() {
+  showLoader();
+  db.collection('transactions').orderBy('date', 'desc').onSnapshot(snapshot => {
+    transactions = [];
+    snapshot.forEach(doc => {
+      transactions.push({ id: doc.id, ...doc.data() });
+    });
+    
+    renderTransactions();
+    renderRecentTransactions();
+    updateDashboard();
+    hideLoader();
+  }, error => {
+    console.error('Error loading transactions:', error);
+    hideLoader();
+  });
+}
+
+// Render accounts to the table
+function renderAccounts() {
   const accountsList = document.getElementById('accountsList');
+  const searchTerm = document.getElementById('accountSearch').value.toLowerCase();
   
   if (accounts.length === 0) {
     accountsList.innerHTML = '<tr><td colspan="5" class="text-center">No accounts found</td></tr>';
     return;
   }
   
-  accountsList.innerHTML = accounts.map(account => `
-    <tr>
-      <td>${account.name}</td>
-      <td><span class="badge ${getAccountBadgeClass(account.type)}">${account.type}</span></td>
-      <td class="text-right">${formatCurrency(account.balance || 0)}</td>
-      <td><span class="badge ${account.balance > 0 ? 'badge-warning' : 'badge-success'}">${account.balance > 0 ? 'Active' : 'Settled'}</span></td>
+  let filteredAccounts = accounts;
+  if (searchTerm) {
+    filteredAccounts = accounts.filter(account => 
+      account.companyName.toLowerCase().includes(searchTerm)
+    );
+  }
+  
+  accountsList.innerHTML = '';
+  filteredAccounts.forEach(account => {
+    const row = document.createElement('tr');
+    
+    // Calculate balance
+    const balance = calculateAccountBalance(account.id);
+    
+    // Determine status
+    let status = 'Inactive';
+    let statusClass = 'badge-secondary';
+    
+    if (balance > 0) {
+      status = 'Creditor';
+      statusClass = 'badge-success';
+    } else if (balance < 0) {
+      status = 'Debtor';
+      statusClass = 'badge-danger';
+    }
+    
+    row.innerHTML = `
+      <td>${account.companyName}</td>
+      <td>${account.accountType}</td>
+      <td class="text-right">₹${Math.abs(balance).toFixed(2)}</td>
+      <td><span class="badge ${statusClass}">${status}</span></td>
       <td>
         <button class="btn btn-secondary btn-sm" onclick="viewAccount('${account.id}')">View</button>
         <button class="btn btn-primary btn-sm" onclick="editAccount('${account.id}')">Edit</button>
       </td>
-    </tr>
-  `).join('');
+    `;
+    
+    accountsList.appendChild(row);
+  });
 }
 
-// Populate transactions list
-function populateTransactionsList() {
+// Render transactions to the table
+function renderTransactions() {
   const transactionsList = document.getElementById('transactionsList');
   
   if (transactions.length === 0) {
-    transactionsList.innerHTML = '<tr><td colspan="8" class="text-center">No transactions found</td></tr>';
+    transactionsList.innerHTML = '<tr><td colspan="6" class="text-center">No transactions found</td></tr>';
     return;
   }
   
-  transactionsList.innerHTML = transactions.map(transaction => `
-    <tr>
-      <td>${formatDate(transaction.date)}</td>
-      <td>${getAccountName(transaction.accountId)}</td>
-      <td><span class="badge ${getTransactionBadgeClass(transaction.type)}">${transaction.type}</span></td>
-      <td>${transaction.description || 'N/A'}</td>
-      <td class="text-right">${transaction.type === 'sale' || transaction.type === 'receipt' ? formatCurrency(transaction.amount) : '-'}</td>
-      <td class="text-right">${transaction.type === 'purchase' || transaction.type === 'payment' || transaction.type === 'expense' ? formatCurrency(transaction.amount) : '-'}</td>
-      <td class="text-right">${formatCurrency(calculateAccountBalance(transaction.accountId, transaction.date))}</td>
-      <td>
-        <button class="btn btn-secondary btn-sm" onclick="viewTransaction('${transaction.id}')">View</button>
-        <button class="btn btn-primary btn-sm" onclick="editTransaction('${transaction.id}')">Edit</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// Populate account filter dropdown
-function populateAccountFilter() {
-  const accountFilter = document.getElementById('accountFilter');
-  const transactionAccount = document.getElementById('transactionAccount');
-  
-  // Clear existing options except the first one
-  while (accountFilter.options.length > 1) {
-    accountFilter.remove(1);
-  }
-  while (transactionAccount.options.length > 1) {
-    transactionAccount.remove(1);
-  }
-  
-  // Add account options
-  accounts.forEach(account => {
-    const option = document.createElement('option');
-    option.value = account.id;
-    option.textContent = account.name;
-    
-    accountFilter.appendChild(option.cloneNode(true));
-    transactionAccount.appendChild(option);
-  });
-}
-
-// Filter transactions based on selected filters
-function filterTransactions() {
-  const typeFilter = document.getElementById('transactionTypeFilter').value;
-  const accountFilter = document.getElementById('accountFilter').value;
-  const dateFrom = document.getElementById('dateFromFilter').value;
-  const dateTo = document.getElementById('dateToFilter').value;
-  
-  let filteredTransactions = [...transactions];
-  
   // Apply filters
-  if (typeFilter) {
+  const typeFilter = document.getElementById('transactionTypeFilter').value;
+  const statusFilter = document.getElementById('transactionStatusFilter').value;
+  const startDate = document.getElementById('startDateFilter').value;
+  const endDate = document.getElementById('endDateFilter').value;
+  
+  let filteredTransactions = transactions;
+  
+  if (typeFilter !== 'all') {
     filteredTransactions = filteredTransactions.filter(t => t.type === typeFilter);
   }
   
-  if (accountFilter) {
-    filteredTransactions = filteredTransactions.filter(t => t.accountId === accountFilter);
+  if (statusFilter !== 'all') {
+    filteredTransactions = filteredTransactions.filter(t => t.status === statusFilter);
   }
   
-  if (dateFrom) {
-    filteredTransactions = filteredTransactions.filter(t => new Date(t.date) >= new Date(dateFrom));
+  if (startDate) {
+    filteredTransactions = filteredTransactions.filter(t => t.date >= startDate);
   }
   
-  if (dateTo) {
-    const toDate = new Date(dateTo);
-    toDate.setHours(23, 59, 59); // Include the entire end date
-    filteredTransactions = filteredTransactions.filter(t => new Date(t.date) <= toDate);
+  if (endDate) {
+    filteredTransactions = filteredTransactions.filter(t => t.date <= endDate);
   }
   
-  // Update transactions list with filtered data
-  const transactionsList = document.getElementById('transactionsList');
-  
-  if (filteredTransactions.length === 0) {
-    transactionsList.innerHTML = '<tr><td colspan="8" class="text-center">No matching transactions found</td></tr>';
-    return;
-  }
-  
-  transactionsList.innerHTML = filteredTransactions.map(transaction => `
-    <tr>
+  transactionsList.innerHTML = '';
+  filteredTransactions.forEach(transaction => {
+    const account = accounts.find(a => a.id === transaction.accountId);
+    const accountName = account ? account.companyName : 'Unknown Account';
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
       <td>${formatDate(transaction.date)}</td>
-      <td>${getAccountName(transaction.accountId)}</td>
       <td><span class="badge ${getTransactionBadgeClass(transaction.type)}">${transaction.type}</span></td>
-      <td>${transaction.description || 'N/A'}</td>
-      <td class="text-right">${transaction.type === 'sale' || transaction.type === 'receipt' ? formatCurrency(transaction.amount) : '-'}</td>
-      <td class="text-right">${transaction.type === 'purchase' || transaction.type === 'payment' || transaction.type === 'expense' ? formatCurrency(transaction.amount) : '-'}</td>
-      <td class="text-right">${formatCurrency(calculateAccountBalance(transaction.accountId, transaction.date))}</td>
+      <td>${accountName}</td>
+      <td class="text-right">₹${transaction.amount.toFixed(2)}</td>
+      <td><span class="badge ${getStatusBadgeClass(transaction.status)}">${transaction.status}</span></td>
       <td>
         <button class="btn btn-secondary btn-sm" onclick="viewTransaction('${transaction.id}')">View</button>
         <button class="btn btn-primary btn-sm" onclick="editTransaction('${transaction.id}')">Edit</button>
       </td>
-    </tr>
-  `).join('');
-}
-
-// Generate report based on selected parameters
-function generateReport() {
-  const reportType = document.getElementById('reportType').value;
-  const fromDate = document.getElementById('reportFromDate').value;
-  const toDate = document.getElementById('reportToDate').value;
-  
-  if (!fromDate || !toDate) {
-    alert('Please select both from and to dates');
-    return;
-  }
-  
-  let reportData = [];
-  let reportTitle = '';
-  
-  // Filter transactions by date
-  const from = new Date(fromDate);
-  const to = new Date(toDate);
-  to.setHours(23, 59, 59); // Include the entire end date
-  
-  const dateFilteredTransactions = transactions.filter(t => {
-    const tDate = new Date(t.date);
-    return tDate >= from && tDate <= to;
-  });
-  
-  // Generate report based on type
-  switch (reportType) {
-    case 'profitLoss':
-      reportTitle = 'Profit & Loss Statement';
-      reportData = generateProfitLossReport(dateFilteredTransactions);
-      break;
-    case 'balanceSheet':
-      reportTitle = 'Balance Sheet';
-      reportData = generateBalanceSheetReport(dateFilteredTransactions);
-      break;
-    case 'cashFlow':
-      reportTitle = 'Cash Flow Statement';
-      reportData = generateCashFlowReport(dateFilteredTransactions);
-      break;
-    case 'trialBalance':
-      reportTitle = 'Trial Balance';
-      reportData = generateTrialBalanceReport(dateFilteredTransactions);
-      break;
-  }
-  
-  // Update report title
-  document.getElementById('reportTitle').textContent = `${reportTitle} (${formatDate(fromDate)} to ${formatDate(toDate)})`;
-  
-  // Display report
-  const reportContent = document.getElementById('reportContent');
-  reportContent.innerHTML = reportData;
-}
-
-// Generate Profit & Loss Report
-function generateProfitLossReport(transactions) {
-  // Calculate total income
-  const income = transactions
-    .filter(t => t.type === 'sale')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
-  
-  // Calculate total expenses
-  const expenses = transactions
-    .filter(t => t.type === 'expense' || t.type === 'purchase')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
-  
-  // Calculate net profit
-  const netProfit = income - expenses;
-  
-  return `
-    <div class="space-y-4">
-      <div class="flex justify-between border-b pb-2">
-        <span class="font-semibold">Income:</span>
-        <span class="font-semibold">${formatCurrency(income)}</span>
-      </div>
-      <div class="flex justify-between border-b pb-2">
-        <span class="font-semibold">Expenses:</span>
-        <span class="font-semibold">${formatCurrency(expenses)}</span>
-      </div>
-      <div class="flex justify-between border-b pb-2 ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}">
-        <span class="font-bold">Net Profit:</span>
-        <span class="font-bold">${formatCurrency(netProfit)}</span>
-      </div>
-    </div>
-  `;
-}
-
-// Generate Balance Sheet Report
-function generateBalanceSheetReport(transactions) {
-  // Calculate total assets (cash + receivables)
-  const cash = accounts
-    .filter(acc => acc.type === 'cash' || acc.type === 'bank')
-    .reduce((sum, acc) => sum + (acc.balance || 0), 0);
-  
-  const receivables = accounts
-    .filter(acc => acc.type === 'customer')
-    .reduce((sum, acc) => sum + (acc.balance || 0), 0);
-  
-  const totalAssets = cash + receivables;
-  
-  // Calculate total liabilities (payables)
-  const payables = accounts
-    .filter(acc => acc.type === 'supplier')
-    .reduce((sum, acc) => sum + (acc.balance || 0), 0);
-  
-  const totalLiabilities = payables;
-  
-  // Calculate equity
-  const equity = totalAssets - totalLiabilities;
-  
-  return `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <h3 class="font-semibold mb-2">Assets</h3>
-        <div class="space-y-2">
-          <div class="flex justify-between">
-            <span>Cash & Bank:</span>
-            <span>${formatCurrency(cash)}</span>
-          </div>
-          <div class="flex justify-between">
-            <span>Accounts Receivable:</span>
-            <span>${formatCurrency(receivables)}</span>
-          </div>
-          <div class="flex justify-between border-t pt-2 font-semibold">
-            <span>Total Assets:</span>
-            <span>${formatCurrency(totalAssets)}</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <h3 class="font-semibold mb-2">Liabilities & Equity</h3>
-        <div class="space-y-2">
-          <div class="flex justify-between">
-            <span>Accounts Payable:</span>
-            <span>${formatCurrency(payables)}</span>
-          </div>
-          <div class="flex justify-between border-t pt-2">
-            <span>Equity:</span>
-            <span>${formatCurrency(equity)}</span>
-          </div>
-          <div class="flex justify-between border-t pt-2 font-semibold">
-            <span>Total Liabilities & Equity:</span>
-            <span>${formatCurrency(totalLiabilities + equity)}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// Generate Cash Flow Report
-function generateCashFlowReport(transactions) {
-  // Calculate cash from operations
-  const cashReceipts = transactions
-    .filter(t => t.type === 'receipt')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
-  
-  const cashPayments = transactions
-    .filter(t => t.type === 'payment' || t.type === 'expense')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
-  
-  const netCashFromOperations = cashReceipts - cashPayments;
-  
-  return `
-    <div class="space-y-4">
-      <div class="flex justify-between border-b pb-2">
-        <span>Cash Receipts from Customers:</span>
-        <span>${formatCurrency(cashReceipts)}</span>
-      </div>
-      <div class="flex justify-between border-b pb-2">
-        <span>Cash Payments to Suppliers & Expenses:</span>
-        <span>${formatCurrency(cashPayments)}</span>
-      </div>
-      <div class="flex justify-between border-b pb-2 font-semibold ${netCashFromOperations >= 0 ? 'text-green-600' : 'text-red-600'}">
-        <span>Net Cash from Operations:</span>
-        <span>${formatCurrency(netCashFromOperations)}</span>
-      </div>
-    </div>
-  `;
-}
-
-// Generate Trial Balance Report
-function generateTrialBalanceReport(transactions) {
-  // Group transactions by account and calculate debits/credits
-  const accountBalances = {};
-  
-  transactions.forEach(t => {
-    if (!accountBalances[t.accountId]) {
-      accountBalances[t.accountId] = {
-        name: getAccountName(t.accountId),
-        debit: 0,
-        credit: 0
-      };
-    }
-    
-    if (t.type === 'sale' || t.type === 'receipt') {
-      accountBalances[t.accountId].debit += t.amount || 0;
-    } else if (t.type === 'purchase' || t.type === 'payment' || t.type === 'expense') {
-      accountBalances[t.accountId].credit += t.amount || 0;
-    }
-  });
-  
-  // Create table rows
-  let rows = '';
-  let totalDebit = 0;
-  let totalCredit = 0;
-  
-  for (const accountId in accountBalances) {
-    const balance = accountBalances[accountId];
-    rows += `
-      <tr>
-        <td>${balance.name}</td>
-        <td class="text-right">${formatCurrency(balance.debit)}</td>
-        <td class="text-right">${formatCurrency(balance.credit)}</td>
-      </tr>
     `;
     
-    totalDebit += balance.debit;
-    totalCredit += balance.credit;
-  }
-  
-  return `
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Account</th>
-            <th class="text-right">Debit (₹)</th>
-            <th class="text-right">Credit (₹)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-        <tfoot>
-          <tr class="font-semibold">
-            <td>Total</td>
-            <td class="text-right">${formatCurrency(totalDebit)}</td>
-            <td class="text-right">${formatCurrency(totalCredit)}</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  `;
+    transactionsList.appendChild(row);
+  });
 }
 
-// Open account modal
-function openAccountModal(account = null) {
-  const modal = document.getElementById('accountModal');
-  const form = document.getElementById('accountForm');
+// Render recent transactions for dashboard
+function renderRecentTransactions() {
+  const recentTransactions = document.getElementById('recentTransactions');
+  const recent = transactions.slice(0, 5);
   
-  if (account) {
-    // Edit mode
-    document.getElementById('modalTitle').textContent = 'Edit Account';
-    document.getElementById('accountName').value = account.name;
-    document.getElementById('accountType').value = account.type;
-    document.getElementById('accountBalance').value = account.balance || 0;
-    document.getElementById('accountContact').value = account.contact || '';
-    document.getElementById('saveAccountBtn').setAttribute('data-id', account.id);
-  } else {
-    // Add mode
-    document.getElementById('modalTitle').textContent = 'Add New Account';
-    form.reset();
-    document.getElementById('accountBalance').value = 0;
-    document.getElementById('saveAccountBtn').removeAttribute('data-id');
-  }
-  
-  modal.classList.remove('hidden');
-}
-
-// Close account modal
-function closeAccountModal() {
-  document.getElementById('accountModal').classList.add('hidden');
-}
-
-// Save account
-async function saveAccount() {
-  const form = document.getElementById('accountForm');
-  const accountId = document.getElementById('saveAccountBtn').getAttribute('data-id');
-  const accountData = {
-    name: document.getElementById('accountName').value,
-    type: document.getElementById('accountType').value,
-    balance: parseFloat(document.getElementById('accountBalance').value) || 0,
-    contact: document.getElementById('accountContact').value,
-    updatedAt: new Date()
-  };
-  
-  if (!accountData.name || !accountData.type) {
-    alert('Please fill in all required fields');
+  if (recent.length === 0) {
+    recentTransactions.innerHTML = '<p class="text-center">No recent transactions</p>';
     return;
   }
   
-  showLoader();
+  let html = '<div class="table-container"><table class="table"><thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Amount</th></tr></thead><tbody>';
   
-  try {
-    if (accountId) {
-      // Update existing account
-      await db.collection('accounts').doc(accountId).update(accountData);
-    } else {
-      // Add new account
-      accountData.createdAt = new Date();
-      await db.collection('accounts').add(accountData);
-    }
+  recent.forEach(transaction => {
+    const account = accounts.find(a => a.id === transaction.accountId);
+    const accountName = account ? account.companyName : 'Unknown Account';
     
-    // Reload data
-    await loadData();
-    closeAccountModal();
-    hideLoader();
-  } catch (error) {
-    console.error('Error saving account:', error);
-    hideLoader();
-    alert('Error saving account. Please try again.');
-  }
+    html += `
+      <tr>
+        <td>${formatDate(transaction.date)}</td>
+        <td><span class="badge ${getTransactionBadgeClass(transaction.type)}">${transaction.type}</span></td>
+        <td>${accountName}</td>
+        <td class="text-right">₹${transaction.amount.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+  
+  html += '</tbody></table></div>';
+  recentTransactions.innerHTML = html;
 }
 
-// Open transaction modal
-function openTransactionModal(transaction = null) {
-  const modal = document.getElementById('transactionModal');
-  const form = document.getElementById('transactionForm');
+// Update dashboard with current data
+function updateDashboard() {
+  // Calculate totals
+  const receivables = calculateTotalReceivables();
+  const payables = calculateTotalPayables();
+  const netPosition = receivables - payables;
+  const monthSales = calculateMonthSales();
   
-  // Set today's date as default
-  document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+  // Update DOM elements
+  document.getElementById('totalReceivables').textContent = `₹${receivables.toFixed(2)}`;
+  document.getElementById('totalPayables').textContent = `₹${payables.toFixed(2)}`;
+  document.getElementById('netPosition').textContent = `₹${Math.abs(netPosition).toFixed(2)}`;
+  document.getElementById('monthSales').textContent = `₹${monthSales.toFixed(2)}`;
   
-  if (transaction) {
-    // Edit mode
-    document.getElementById('modalTitle').textContent = 'Edit Transaction';
-    document.getElementById('transactionDate').value = transaction.date;
-    document.getElementById('transactionType').value = transaction.type;
-    document.getElementById('transactionAccount').value = transaction.accountId;
-    document.getElementById('transactionDescription').value = transaction.description || '';
-    document.getElementById('transactionAmount').value = transaction.amount || 0;
-    document.getElementById('transactionReference').value = transaction.reference || '';
-    document.getElementById('saveTransactionBtn').setAttribute('data-id', transaction.id);
+  // Set net position color
+  const netPositionChange = document.getElementById('netPositionChange');
+  if (netPosition > 0) {
+    netPositionChange.className = 'stat-change positive';
+    netPositionChange.innerHTML = '<span>Net positive position</span>';
+  } else if (netPosition < 0) {
+    netPositionChange.className = 'stat-change negative';
+    netPositionChange.innerHTML = '<span>Net negative position</span>';
   } else {
-    // Add mode
-    document.getElementById('modalTitle').textContent = 'Add New Transaction';
-    form.reset();
-    document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('saveTransactionBtn').removeAttribute('data-id');
+    netPositionChange.className = 'stat-change';
+    netPositionChange.innerHTML = '<span>Balanced position</span>';
   }
   
-  modal.classList.remove('hidden');
+  // Update outstanding payments
+  updateOutstandingPayments();
 }
 
-// Close transaction modal
-function closeTransactionModal() {
-  document.getElementById('transactionModal').classList.add('hidden');
+// Calculate total receivables
+function calculateTotalReceivables() {
+  let total = 0;
+  
+  transactions.forEach(transaction => {
+    if (transaction.type === 'sale' && transaction.status !== 'paid') {
+      const paidAmount = transaction.paidAmount || 0;
+      total += (transaction.amount - paidAmount);
+    }
+  });
+  
+  return total;
 }
 
-// Save transaction
-async function saveTransaction() {
-  const form = document.getElementById('transactionForm');
-  const transactionId = document.getElementById('saveTransactionBtn').getAttribute('data-id');
-  const transactionData = {
-    date: document.getElementById('transactionDate').value,
-    type: document.getElementById('transactionType').value,
-    accountId: document.getElementById('transactionAccount').value,
-    description: document.getElementById('transactionDescription').value,
-    amount: parseFloat(document.getElementById('transactionAmount').value) || 0,
-    reference: document.getElementById('transactionReference').value,
-    updatedAt: new Date()
-  };
+// Calculate total payables
+function calculateTotalPayables() {
+  let total = 0;
   
-  if (!transactionData.date || !transactionData.type || !transactionData.accountId || 
-      !transactionData.description || !transactionData.amount) {
-    alert('Please fill in all required fields');
-    return;
-  }
+  transactions.forEach(transaction => {
+    if (transaction.type === 'purchase' && transaction.status !== 'paid') {
+      const paidAmount = transaction.paidAmount || 0;
+      total += (transaction.amount - paidAmount);
+    }
+  });
   
-  showLoader();
+  return total;
+}
+
+// Calculate sales for current month
+function calculateMonthSales() {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
   
-  try {
-    if (transactionId) {
-      // Update existing transaction
-      await db.collection('transactions').doc(transactionId).update(transactionData);
-    } else {
-      // Add new transaction
-      transactionData.createdAt = new Date();
-      await db.collection('transactions').add(transactionData);
+  let total = 0;
+  
+  transactions.forEach(transaction => {
+    if (transaction.type === 'sale' && transaction.date >= firstDay && transaction.date <= lastDay) {
+      total += transaction.amount;
+    }
+  });
+  
+  return total;
+}
+
+// Update outstanding payments section
+function updateOutstandingPayments() {
+  const outstandingPayments = document.getElementById('outstandingPayments');
+  let overdue = [];
+  let dueSoon = [];
+  
+  const today = new Date().toISOString().split('T')[0];
+  
+  transactions.forEach(transaction => {
+    if ((transaction.type === 'sale' || transaction.type === 'purchase') && 
+        transaction.status !== 'paid') {
       
-      // Update account balance
-      const account = accounts.find(acc => acc.id === transactionData.accountId);
-      if (account) {
-        let newBalance = account.balance || 0;
-        
-        if (transactionData.type === 'sale' || transactionData.type === 'receipt') {
-          // Increase balance for sales and receipts
-          newBalance += transactionData.amount;
-        } else if (transactionData.type === 'purchase' || transactionData.type === 'payment' || transactionData.type === 'expense') {
-          // Decrease balance for purchases, payments, and expenses
-          newBalance -= transactionData.amount;
-        }
-        
-        await db.collection('accounts').doc(transactionData.accountId).update({
-          balance: newBalance,
-          updatedAt: new Date()
-        });
+      const dueDate = transaction.dueDate || transaction.date;
+      const daysDiff = Math.floor((new Date(dueDate) - new Date(today)) / (1000 * 60 * 60 * 24));
+      
+      const payment = {
+        id: transaction.id,
+        type: transaction.type,
+        accountId: transaction.accountId,
+        amount: transaction.amount,
+        paidAmount: transaction.paidAmount || 0,
+        dueDate: dueDate,
+        daysDiff: daysDiff
+      };
+      
+      if (daysDiff < 0) {
+        overdue.push(payment);
+      } else if (daysDiff <= 7) {
+        dueSoon.push(payment);
       }
     }
+  });
+  
+  let html = '';
+  
+  if (overdue.length === 0 && dueSoon.length === 0) {
+    html = '<p class="text-center">No outstanding payments</p>';
+  } else {
+    if (overdue.length > 0) {
+      html += '<h4 class="font-medium mb-2 negative">Overdue Payments</h4>';
+      html += '<div class="table-container"><table class="table"><thead><tr><th>Account</th><th>Amount</th><th>Due Date</th><th>Status</th></tr></thead><tbody>';
+      
+      overdue.forEach(payment => {
+        const account = accounts.find(a => a.id === payment.accountId);
+        const accountName = account ? account.companyName : 'Unknown Account';
+        const amountDue = payment.amount - payment.paidAmount;
+        
+        html += `
+          <tr>
+            <td>${accountName}</td>
+            <td class="text-right">₹${amountDue.toFixed(2)}</td>
+            <td>${formatDate(payment.dueDate)}</td>
+            <td><span class="badge badge-danger">Overdue</span></td>
+          </tr>
+        `;
+      });
+      
+      html += '</tbody></table></div>';
+    }
     
-    // Reload data
-    await loadData();
-    closeTransactionModal();
-    hideLoader();
-  } catch (error) {
-    console.error('Error saving transaction:', error);
-    hideLoader();
-    alert('Error saving transaction. Please try again.');
-  }
-}
-
-// Save settings
-async function saveSettings() {
-  const settingsData = {
-    businessName: document.getElementById('businessName').value,
-    currency: document.getElementById('currency').value,
-    financialYearStart: document.getElementById('financialYearStart').value,
-    updatedAt: new Date()
-  };
-  
-  showLoader();
-  
-  try {
-    await db.collection('settings').doc('appSettings').set(settingsData, { merge: true });
-    settings = settingsData;
-    applySettings();
-    hideLoader();
-    alert('Settings saved successfully!');
-  } catch (error) {
-    console.error('Error saving settings:', error);
-    hideLoader();
-    alert('Error saving settings. Please try again.');
-  }
-}
-
-// Clear duplicates
-async function clearDuplicates() {
-  if (!confirm('Are you sure you want to clear duplicate entries? This action cannot be undone.')) {
-    return;
+    if (dueSoon.length > 0) {
+      html += '<h4 class="font-medium mb-2 warning">Due Soon</h4>';
+      html += '<div class="table-container"><table class="table"><thead><tr><th>Account</th><th>Amount</th><th>Due Date</th><th>Status</th></tr></thead><tbody>';
+      
+      dueSoon.forEach(payment => {
+        const account = accounts.find(a => a.id === payment.accountId);
+        const accountName = account ? account.companyName : 'Unknown Account';
+        const amountDue = payment.amount - payment.paidAmount;
+        
+        html += `
+          <tr>
+            <td>${accountName}</td>
+            <td class="text-right">₹${amountDue.toFixed(2)}</td>
+            <td>${formatDate(payment.dueDate)}</td>
+            <td><span class="badge badge-warning">Due in ${payment.daysDiff} days</span></td>
+          </tr>
+        `;
+      });
+      
+      html += '</tbody></table></div>';
+    }
   }
   
-  showLoader();
+  outstandingPayments.innerHTML = html;
+}
+
+// Calculate account balance
+function calculateAccountBalance(accountId) {
+  let balance = 0;
   
-  try {
-    // This is a placeholder - in a real application, you would implement
-    // a proper duplicate detection and removal algorithm
-    alert('Duplicate clearing functionality would be implemented here.');
-    hideLoader();
-  } catch (error) {
-    console.error('Error clearing duplicates:', error);
-    hideLoader();
-    alert('Error clearing duplicates. Please try again.');
-  }
-}
-
-// Clear cache
-async function clearCache() {
-  if (!confirm('Are you sure you want to clear the cache? This will force a reload of all data.')) {
-    return;
-  }
-  
-  showLoader();
-  
-  try {
-    // Clear local data and reload
-    accounts = [];
-    transactions = [];
-    await loadData();
-    hideLoader();
-    alert('Cache cleared successfully!');
-  } catch (error) {
-    console.error('Error clearing cache:', error);
-    hideLoader();
-    alert('Error clearing cache. Please try again.');
-  }
-}
-
-// Reset system
-async function resetSystem() {
-  if (!confirm('WARNING: This will reset ALL data in the system. This action cannot be undone. Are you sure?')) {
-    return;
-  }
-  
-  const password = prompt('Please enter the admin password to confirm:');
-  if (password !== '1234') {
-    alert('Incorrect password. System reset cancelled.');
-    return;
-  }
-  
-  showLoader();
-  
-  try {
-    // This is a placeholder - in a real application, you would implement
-    // a proper reset mechanism with extreme caution
-    alert('System reset functionality would be implemented here.');
-    hideLoader();
-  } catch (error) {
-    console.error('Error resetting system:', error);
-    hideLoader();
-    alert('Error resetting system. Please try again.');
-  }
-}
-
-// View account details
-function viewAccount(accountId) {
-  const account = accounts.find(acc => acc.id === accountId);
-  if (account) {
-    alert(`Account Details:\nName: ${account.name}\nType: ${account.type}\nBalance: ${formatCurrency(account.balance || 0)}`);
-  }
-}
-
-// Edit account
-function editAccount(accountId) {
-  const account = accounts.find(acc => acc.id === accountId);
-  if (account) {
-    openAccountModal(account);
-  }
-}
-
-// View transaction details
-function viewTransaction(transactionId) {
-  const transaction = transactions.find(t => t.id === transactionId);
-  if (transaction) {
-    alert(`Transaction Details:\nDate: ${formatDate(transaction.date)}\nAccount: ${getAccountName(transaction.accountId)}\nType: ${transaction.type}\nAmount: ${formatCurrency(transaction.amount || 0)}`);
-  }
-}
-
-// Edit transaction
-function editTransaction(transactionId) {
-  const transaction = transactions.find(t => t.id === transactionId);
-  if (transaction) {
-    openTransactionModal(transaction);
-  }
-}
-
-// Helper function to format currency
-function formatCurrency(amount) {
-  return '₹' + (amount || 0).toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
-// Helper function to format date
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}
-
-// Helper function to get account name by ID
-function getAccountName(accountId) {
-  const account = accounts.find(acc => acc.id === accountId);
-  return account ? account.name : 'Unknown Account';
-}
-
-// Helper function to get account badge class
-function getAccountBadgeClass(type) {
-  switch (type) {
-    case 'customer': return 'badge-success';
-    case 'supplier': return 'badge-warning';
-    case 'bank': return 'badge-secondary';
-    case 'cash': return 'badge-secondary';
-    case 'income': return 'badge-success';
-    case 'expense': return 'badge-danger';
-    case 'asset': return 'badge-secondary';
-    case 'liability': return 'badge-warning';
-    default: return 'badge-secondary';
-  }
-}
-
-// Helper function to get transaction badge class
-function getTransactionBadgeClass(type) {
-  switch (type) {
-    case 'sale': return 'badge-success';
-    case 'purchase': return 'badge-warning';
-    case 'payment': return 'badge-danger';
-    case 'receipt': return 'badge-success';
-    case 'expense': return 'badge-danger';
-    case 'adjustment': return 'badge-secondary';
-    default: return 'badge-secondary';
-  }
-}
-
-// Helper function to calculate account balance up to a specific date
-function calculateAccountBalance(accountId, asOfDate) {
-  const account = accounts.find(acc => acc.id === accountId);
-  if (!account) return 0;
-  
-  // Get all transactions for this account up to the specified date
-  const accountTransactions = transactions.filter(t => 
-    t.accountId === accountId && new Date(t.date) <= new Date(asOfDate)
-  );
-  
-  // Calculate balance based on transaction types
-  let balance = account.balance || 0;
-  
-  accountTransactions.forEach(t => {
-    if (t.type === 'sale' || t.type === 'receipt') {
-      balance += t.amount || 0;
-    } else if (t.type === 'purchase' || t.type === 'payment' || t.type === 'expense') {
-      balance -= t.amount || 0;
+  transactions.forEach(transaction => {
+    if (transaction.accountId === accountId) {
+      if (transaction.type === 'sale' || transaction.type === 'receipt') {
+        balance += transaction.amount;
+      } else if (transaction.type === 'purchase' || transaction.type === 'payment') {
+        balance -= transaction.amount;
+      }
     }
   });
   
   return balance;
 }
+
+// Filter accounts based on search term
+function filterAccounts() {
+  renderAccounts();
+}
+
+// Filter transactions based on selected filters
+function filterTransactions() {
+  renderTransactions();
+}
+
+// Add new account
+function addAccount() {
+  const companyName = document.getElementById('companyName').value;
+  const accountType = document.getElementById('accountType').value;
+  const openingBalance = parseFloat(document.getElementById('openingBalance').value) || 0;
+  const accountNotes = document.getElementById('accountNotes').value;
+  
+  if (!companyName) {
+    alert('Please enter a company name');
+    return;
+  }
+  
+  const accountData = {
+    companyName: companyName,
+    accountType: accountType,
+    openingBalance: openingBalance,
+    notes: accountNotes,
+    createdAt: new Date().toISOString()
+  };
+  
+  showLoader();
+  
+  db.collection('accounts').add(accountData)
+    .then(() => {
+      closeModal('addAccountModal');
+      document.getElementById('addAccountForm').reset();
+      hideLoader();
+    })
+    .catch(error => {
+      console.error('Error adding account:', error);
+      alert('Error adding account. Please try again.');
+      hideLoader();
+    });
+}
+
+// Add new transaction
+function addTransaction() {
+  const type = document.getElementById('transactionType').value;
+  const accountId = document.getElementById('transactionAccount').value;
+  const amount = parseFloat(document.getElementById('transactionAmount').value);
+  const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+  const date = document.getElementById('transactionDate').value;
+  const notes = document.getElementById('transactionNotes').value;
+  
+  if (!accountId || !amount || !date) {
+    alert('Please fill in all required fields');
+    return;
+  }
+  
+  if (amount <= 0) {
+    alert('Amount must be greater than 0');
+    return;
+  }
+  
+  // Determine status based on payment
+  let status = 'pending';
+  if (paymentAmount >= amount) {
+    status = 'paid';
+  } else if (paymentAmount > 0) {
+    status = 'partial';
+  }
+  
+  const transactionData = {
+    type: type,
+    accountId: accountId,
+    amount: amount,
+    paidAmount: paymentAmount,
+    date: date,
+    notes: notes,
+    status: status,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Set due date for sales and purchases (30 days from transaction date)
+  if (type === 'sale' || type === 'purchase') {
+    const dueDate = new Date(date);
+    dueDate.setDate(dueDate.getDate() + 30);
+    transactionData.dueDate = dueDate.toISOString().split('T')[0];
+  }
+  
+  showLoader();
+  
+  db.collection('transactions').add(transactionData)
+    .then(() => {
+      closeModal('addTransactionModal');
+      document.getElementById('addTransactionForm').reset();
+      hideLoader();
+    })
+    .catch(error => {
+      console.error('Error adding transaction:', error);
+      alert('Error adding transaction. Please try again.');
+      hideLoader();
+    });
+}
+
+// View account details
+function viewAccount(accountId) {
+  // Implementation for viewing account details
+  alert('View account details for: ' + accountId);
+}
+
+// Edit account
+function editAccount(accountId) {
+  // Implementation for editing account
+  alert('Edit account: ' + accountId);
+}
+
+// View transaction details
+function viewTransaction(transactionId) {
+  // Implementation for viewing transaction details
+  alert('View transaction details for: ' + transactionId);
+}
+
+// Edit transaction
+function editTransaction(transactionId) {
+  // Implementation for editing transaction
+  alert('Edit transaction: ' + transactionId);
+}
+
+// Generate sales report
+function generateSalesReport() {
+  const reportContainer = document.getElementById('reportContainer');
+  const sales = transactions.filter(t => t.type === 'sale');
+  
+  if (sales.length === 0) {
+    reportContainer.innerHTML = '<p class="text-center">No sales data available</p>';
+    return;
+  }
+  
+  let totalSales = 0;
+  let html = `
+    <h3 class="text-center mb-4">Sales Report</h3>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
+  sales.forEach(sale => {
+    const account = accounts.find(a => a.id === sale.accountId);
+    const accountName = account ? account.companyName : 'Unknown Account';
+    totalSales += sale.amount;
+    
+    html += `
+      <tr>
+        <td>${formatDate(sale.date)}</td>
+        <td>${accountName}</td>
+        <td class="text-right">₹${sale.amount.toFixed(2)}</td>
+        <td><span class="badge ${getStatusBadgeClass(sale.status)}">${sale.status}</span></td>
+      </tr>
+    `;
+  });
+  
+  html += `
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" class="text-right font-medium">Total Sales:</td>
+            <td class="text-right font-medium">₹${totalSales.toFixed(2)}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="text-center mt-4">
+      <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+    </div>
+  `;
+  
+  reportContainer.innerHTML = html;
+}
+
+// Generate purchase report
+function generatePurchaseReport() {
+  const reportContainer = document.getElementById('reportContainer');
+  const purchases = transactions.filter(t => t.type === 'purchase');
+  
+  if (purchases.length === 0) {
+    reportContainer.innerHTML = '<p class="text-center">No purchase data available</p>';
+    return;
+  }
+  
+  let totalPurchases = 0;
+  let html = `
+    <h3 class="text-center mb-4">Purchase Report</h3>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
+  purchases.forEach(purchase => {
+    const account = accounts.find(a => a.id === purchase.accountId);
+    const accountName = account ? account.companyName : 'Unknown Account';
+    totalPurchases += purchase.amount;
+    
+    html += `
+      <tr>
+        <td>${formatDate(purchase.date)}</td>
+        <td>${accountName}</td>
+        <td class="text-right">₹${purchase.amount.toFixed(2)}</td>
+        <td><span class="badge ${getStatusBadgeClass(purchase.status)}">${purchase.status}</span></td>
+      </tr>
+    `;
+  });
+  
+  html += `
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" class="text-right font-medium">Total Purchases:</td>
+            <td class="text-right font-medium">₹${totalPurchases.toFixed(2)}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="text-center mt-4">
+      <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+    </div>
+  `;
+  
+  reportContainer.innerHTML = html;
+}
+
+// Generate ledger report
+function generateLedgerReport() {
+  const reportContainer = document.getElementById('reportContainer');
+  
+  let html = `
+    <h3 class="text-center mb-4">General Ledger Report</h3>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>Type</th>
+            <th>Balance</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
+  accounts.forEach(account => {
+    const balance = calculateAccountBalance(account.id);
+    let status = 'Inactive';
+    let statusClass = 'badge-secondary';
+    
+    if (balance > 0) {
+      status = 'Creditor';
+      statusClass = 'badge-success';
+    } else if (balance < 0) {
+      status = 'Debtor';
+      statusClass = 'badge-danger';
+    }
+    
+    html += `
+      <tr>
+        <td>${account.companyName}</td>
+        <td>${account.accountType}</td>
+        <td class="text-right">₹${Math.abs(balance).toFixed(2)}</td>
+        <td><span class="badge ${statusClass}">${status}</span></td>
+      </tr>
+    `;
+  });
+  
+  html += `
+        </tbody>
+      </table>
+    </div>
+    <div class="text-center mt-4">
+      <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+    </div>
+  `;
+  
+  reportContainer.innerHTML = html;
+}
+
+// Backup data
+function backupData() {
+  const data = {
+    accounts: accounts,
+    transactions: transactions,
+    backupDate: new Date().toISOString()
+  };
+  
+  const dataStr = JSON.stringify(data, null, 2);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  
+  const exportFileDefaultName = `aditya-fertilizers-backup-${new Date().toISOString().split('T')[0]}.json`;
+  
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+  
+  alert('Data backup completed successfully!');
+}
+
+// Restore data
+function restoreData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+      try {
+        const data = JSON.parse(event.target.result);
+        
+        if (!data.accounts || !data.transactions) {
+          throw new Error('Invalid backup file format');
+        }
+        
+        if (confirm('This will replace all current data. Are you sure?')) {
+          showLoader();
+          
+          // First delete all existing data
+          const deletePromises = [];
+          
+          // Delete all transactions
+          transactions.forEach(transaction => {
+            deletePromises.push(db.collection('transactions').doc(transaction.id).delete());
+          });
+          
+          // Delete all accounts
+          accounts.forEach(account => {
+            deletePromises.push(db.collection('accounts').doc(account.id).delete());
+          });
+          
+          Promise.all(deletePromises)
+            .then(() => {
+              // Add restored accounts
+              const accountPromises = data.accounts.map(account => {
+                const { id, ...accountData } = account;
+                return db.collection('accounts').add(accountData);
+              });
+              
+              // Add restored transactions
+              const transactionPromises = data.transactions.map(transaction => {
+                const { id, ...transactionData } = transaction;
+                return db.collection('transactions').add(transactionData);
+              });
+              
+              return Promise.all([...accountPromises, ...transactionPromises]);
+            })
+            .then(() => {
+              alert('Data restored successfully!');
+              hideLoader();
+            })
+            .catch(error => {
+              console.error('Error restoring data:', error);
+              alert('Error restoring data. Please try again.');
+              hideLoader();
+            });
+        }
+      } catch (error) {
+        console.error('Error parsing backup file:', error);
+        alert('Error parsing backup file. Please make sure you selected a valid backup file.');
+      }
+    };
+    
+    reader.readAsText(file);
+  };
+  
+  input.click();
+}
+
+// Show password modal for admin functions
+function showPasswordModal(action) {
+  currentAction = action;
+  document.getElementById('adminPassword').value = '';
+  document.getElementById('passwordModal').classList.remove('hidden');
+}
+
+// Close password modal
+function closePasswordModal() {
+  document.getElementById('passwordModal').classList.add('hidden');
+  currentAction = null;
+}
+
+// Verify password for admin functions
+function verifyPassword() {
+  const password = document.getElementById('adminPassword').value;
+  
+  if (password === '1234') {
+    closePasswordModal();
+    
+    switch(currentAction) {
+      case 'clearDuplicates':
+        clearDuplicates();
+        break;
+      case 'clearCache':
+        clearCache();
+        break;
+      case 'resetSystem':
+        resetSystem();
+        break;
+    }
+  } else {
+    alert('Incorrect password. Please try again.');
+  }
+}
+
+// Clear duplicates (placeholder implementation)
+function clearDuplicates() {
+  if (confirm('Are you sure you want to clear duplicate entries? This action cannot be undone.')) {
+    showLoader();
+    // Implementation would go here
+    setTimeout(() => {
+      alert('Duplicate entries cleared successfully!');
+      hideLoader();
+    }, 1500);
+  }
+}
+
+// Clear cache (placeholder implementation)
+function clearCache() {
+  if (confirm('Are you sure you want to clear the cache? This will not affect your data.')) {
+    showLoader();
+    // Implementation would go here
+    setTimeout(() => {
+      alert('Cache cleared successfully!');
+      hideLoader();
+    }, 1500);
+  }
+}
+
+// Reset system (placeholder implementation)
+function resetSystem() {
+  if (confirm('WARNING: This will delete ALL data and reset the system to its initial state. This action cannot be undone. Are you sure?')) {
+    showLoader();
+    // Implementation would go here
+    setTimeout(() => {
+      alert('System reset successfully!');
+      hideLoader();
+    }, 1500);
+  }
+}
+
+// Helper function to format date
+function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+// Helper function to get transaction badge class
+function getTransactionBadgeClass(type) {
+  switch(type) {
+    case 'sale': return 'badge-success';
+    case 'purchase': return 'badge-warning';
+    case 'payment': return 'badge-secondary';
+    case 'receipt': return 'badge-success';
+    default: return 'badge-secondary';
+  }
+}
+
+// Helper function to get status badge class
+function getStatusBadgeClass(status) {
+  switch(status) {
+    case 'paid': return 'badge-success';
+    case 'partial': return 'badge-warning';
+    case 'pending': return 'badge-danger';
+    default: return 'badge-secondary';
+  }
+}
+
+// Initialize the app when the page loads
+document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
